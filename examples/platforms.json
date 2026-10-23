@@ -1,0 +1,210 @@
+{
+  "version": 1,
+  "contract_sha256": "90a696cfe77779b6cce038c94a1d477328a805d025187655f0757af7772a527d",
+  "examples": [
+    {
+      "slug": "youtube-video-downloader",
+      "platform": "youtube",
+      "title": "YouTube Video Downloader API",
+      "landing_url": "https://www.reclip.io/api/tools/youtube-video-downloader",
+      "docs_url": "https://www.reclip.io/docs/platforms/youtube-video-downloader",
+      "request": {
+        "tool": "video_downloader",
+        "input": {
+          "source_url": "https://www.youtube.com/watch?v=VIDEO_ID_01",
+          "platform": "youtube",
+          "file_name": "youtube-video.mp4",
+          "format_id": null,
+          "maximum_download_bytes": 100000000,
+          "has_audio": null,
+          "source_title": null,
+          "source_creator": null,
+          "source_thumbnail_url": null,
+          "source_duration_seconds": null
+        },
+        "maximum_credits": 100
+      }
+    },
+    {
+      "slug": "tiktok-video-downloader",
+      "platform": "tiktok",
+      "title": "TikTok Video Downloader API",
+      "landing_url": "https://www.reclip.io/api/tools/tiktok-video-downloader",
+      "docs_url": "https://www.reclip.io/docs/platforms/tiktok-video-downloader",
+      "request": {
+        "tool": "video_downloader",
+        "input": {
+          "source_url": "https://www.tiktok.com/@creator/video/1234567890123456789",
+          "platform": "tiktok",
+          "file_name": "tiktok-video.mp4",
+          "format_id": null,
+          "maximum_download_bytes": 100000000,
+          "has_audio": null,
+          "source_title": null,
+          "source_creator": null,
+          "source_thumbnail_url": null,
+          "source_duration_seconds": null
+        },
+        "maximum_credits": 100
+      }
+    },
+    {
+      "slug": "instagram-video-downloader",
+      "platform": "instagram",
+      "title": "Instagram Video Downloader API",
+      "landing_url": "https://www.reclip.io/api/tools/instagram-video-downloader",
+      "docs_url": "https://www.reclip.io/docs/platforms/instagram-video-downloader",
+      "request": {
+        "tool": "video_downloader",
+        "input": {
+          "source_url": "https://www.instagram.com/reel/REEL_ID/",
+          "platform": "instagram",
+          "file_name": "instagram-video.mp4",
+          "format_id": null,
+          "maximum_download_bytes": 100000000,
+          "has_audio": null,
+          "source_title": null,
+          "source_creator": null,
+          "source_thumbnail_url": null,
+          "source_duration_seconds": null
+        },
+        "maximum_credits": 100
+      }
+    },
+    {
+      "slug": "youtube-ai-clipper",
+      "platform": "youtube",
+      "title": "YouTube Video Clipping API",
+      "landing_url": "https://www.reclip.io/api/tools/youtube-ai-clipper",
+      "docs_url": "https://www.reclip.io/docs/platforms/youtube-ai-clipper",
+      "request": {
+        "tool": "ai_clipper",
+        "input": {
+          "source_url": "https://www.youtube.com/watch?v=VIDEO_ID_01",
+          "options": {
+            "analysis_start_seconds": 0,
+            "analysis_end_seconds": 60
+          }
+        },
+        "maximum_credits": 100
+      }
+    },
+    {
+      "slug": "twitch-vod-clipper",
+      "platform": "twitch",
+      "title": "Twitch VOD Clipping API",
+      "landing_url": "https://www.reclip.io/api/tools/twitch-vod-clipper",
+      "docs_url": "https://www.reclip.io/docs/platforms/twitch-vod-clipper",
+      "request": {
+        "tool": "ai_clipper",
+        "input": {
+          "source_url": "https://www.twitch.tv/videos/1234567890",
+          "options": {
+            "analysis_start_seconds": 0,
+            "analysis_end_seconds": 60
+          }
+        },
+        "maximum_credits": 100
+      }
+    },
+    {
+      "slug": "youtube-ai-broll",
+      "platform": "youtube",
+      "title": "YouTube AI B-Roll API",
+      "landing_url": "https://www.reclip.io/api/tools/youtube-ai-broll",
+      "docs_url": "https://www.reclip.io/docs/platforms/youtube-ai-broll",
+      "request": {
+        "tool": "ai_broll",
+        "input": {
+          "source_url": "https://www.youtube.com/watch?v=VIDEO_ID_01",
+          "options": {
+            "mode": "image",
+            "start_seconds": 0,
+            "end_seconds": 60,
+            "max_shots": 3
+          }
+        },
+        "maximum_credits": 100
+      }
+    },
+    {
+      "slug": "twitch-vod-ai-broll",
+      "platform": "twitch",
+      "title": "Twitch VOD AI B-Roll API",
+      "landing_url": "https://www.reclip.io/api/tools/twitch-vod-ai-broll",
+      "docs_url": "https://www.reclip.io/docs/platforms/twitch-vod-ai-broll",
+      "request": {
+        "tool": "ai_broll",
+        "input": {
+          "source_url": "https://www.twitch.tv/videos/1234567890",
+          "options": {
+            "mode": "image",
+            "start_seconds": 0,
+            "end_seconds": 60,
+            "max_shots": 3
+          }
+        },
+        "maximum_credits": 100
+      }
+    },
+    {
+      "slug": "youtube-ai-captions",
+      "platform": "youtube",
+      "title": "YouTube Video Captions API",
+      "landing_url": "https://www.reclip.io/api/tools/youtube-ai-captions",
+      "docs_url": "https://www.reclip.io/docs/platforms/youtube-ai-captions",
+      "request": {
+        "tool": "ai_captions",
+        "input": {
+          "source_url": "https://www.youtube.com/watch?v=VIDEO_ID_01",
+          "duration_seconds": 60,
+          "options": {
+            "caption_style": {
+              "font_family": "Inter",
+              "font_size": 64,
+              "position_y_percent": 75,
+              "base_color": "#FFFFFF",
+              "highlight_color": "#FFFF00",
+              "outline_color": "#000000",
+              "outline_width": 4,
+              "background_color": "#000000",
+              "background_opacity": 0,
+              "word_spacing": 0
+            }
+          }
+        },
+        "maximum_credits": 100
+      }
+    },
+    {
+      "slug": "youtube-transcript",
+      "platform": "youtube",
+      "title": "YouTube Transcript API",
+      "landing_url": "https://www.reclip.io/api/tools/youtube-transcript",
+      "docs_url": "https://www.reclip.io/docs/tools/youtube-transcript",
+      "request": {
+        "tool": "youtube_transcript",
+        "input": {
+          "source_url": "https://www.youtube.com/watch?v=VIDEO_ID_01",
+          "include_timestamps": true
+        },
+        "maximum_credits": 100
+      }
+    },
+    {
+      "slug": "tiktok-transcript",
+      "platform": "tiktok",
+      "title": "TikTok Transcript API",
+      "landing_url": "https://www.reclip.io/api/tools/tiktok-transcript",
+      "docs_url": "https://www.reclip.io/docs/tools/tiktok-transcript",
+      "request": {
+        "tool": "tiktok_transcript",
+        "input": {
+          "source_url": "https://www.tiktok.com/@creator/video/1234567890123456789",
+          "include_timestamps": true
+        },
+        "maximum_credits": 100
+      }
+    }
+  ]
+}

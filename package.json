@@ -1,0 +1,9 @@
+{
+  "name": "reclip-io-mcp",
+  "version": "1.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node scripts/validate.mjs && node --check examples/inspect.mjs && node --check examples/platforms.mjs && node --test tests/*.test.mjs"
+  }
+}
