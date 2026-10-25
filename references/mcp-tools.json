@@ -2,8 +2,8 @@
   "source": {
     "repository": "https://github.com/asterism-software/reclip-io",
     "branch": "main",
-    "commit": "dedff965e2013f9b6f223fec06b3fc793e31412b",
-    "merged_main": "dedff965e2013f9b6f223fec06b3fc793e31412b",
+    "commit": "16a98f15ec8f4bd5d5a675f77e31d655dcd79d1d",
+    "merged_main": "16a98f15ec8f4bd5d5a675f77e31d655dcd79d1d",
     "working_tree": true,
     "api_version": "1.0.0-beta.2",
     "tool_codes": [
@@ -38,7 +38,7 @@
       "video_to_gif",
       "transcription"
     ],
-    "contract_sha256": "90a696cfe77779b6cce038c94a1d477328a805d025187655f0757af7772a527d"
+    "contract_sha256": "a112c8d9c0e153f86d52f7b3dfb6f5f7f47eaff34cff7121b41c56340c5d3d78"
   },
   "tools": [
     {
@@ -844,15 +844,6 @@
                     "additionalProperties": false
                   }
                 },
-                "required": [
-                  "captions_enabled",
-                  "caption_mode",
-                  "caption_group_size",
-                  "caption_preset_id",
-                  "video_layout_mode",
-                  "clip_length_mode",
-                  "analysis_start_seconds"
-                ],
                 "additionalProperties": false
               }
             },
@@ -1008,15 +999,6 @@
                 "additionalProperties": false
               }
             },
-            "required": [
-              "captions_enabled",
-              "caption_mode",
-              "caption_group_size",
-              "caption_preset_id",
-              "video_layout_mode",
-              "clip_length_mode",
-              "analysis_start_seconds"
-            ],
             "additionalProperties": false
           },
           "project_id": {
@@ -1217,14 +1199,7 @@
                     "enum": ["natural", "cinematic", "illustration"]
                   }
                 },
-                "required": [
-                  "mode",
-                  "captions_enabled",
-                  "start_seconds",
-                  "end_seconds",
-                  "max_shots",
-                  "style"
-                ],
+                "required": ["end_seconds"],
                 "additionalProperties": false
               }
             },
@@ -1265,14 +1240,7 @@
                 "enum": ["natural", "cinematic", "illustration"]
               }
             },
-            "required": [
-              "mode",
-              "captions_enabled",
-              "start_seconds",
-              "end_seconds",
-              "max_shots",
-              "style"
-            ],
+            "required": ["end_seconds"],
             "additionalProperties": false
           },
           "project_id": {
@@ -1458,16 +1426,11 @@
                     "additionalProperties": false
                   }
                 },
-                "required": [
-                  "caption_mode",
-                  "caption_group_size",
-                  "caption_preset_id",
-                  "caption_style"
-                ],
+                "required": ["caption_style"],
                 "additionalProperties": false
               }
             },
-            "required": ["duration_seconds", "start_seconds"],
+            "required": ["duration_seconds"],
             "additionalProperties": false
           },
           "options": {
@@ -1569,12 +1532,7 @@
                 "additionalProperties": false
               }
             },
-            "required": [
-              "caption_mode",
-              "caption_group_size",
-              "caption_preset_id",
-              "caption_style"
-            ],
+            "required": ["caption_style"],
             "additionalProperties": false
           },
           "project_id": {
@@ -2223,7 +2181,7 @@
     },
     {
       "name": "reclip_translate_and_dub",
-      "description": "Translate speech into a new AI voice and replace burned-in subtitles, headlines, offers, and calls to action. Quote the exact input first; maximum_credits is a hard per-job budget.",
+      "description": "Dub video speech into a new AI voice. Optionally translate burned-in captions, headlines, offers, and calls to action. Quote the exact input first; maximum_credits is a hard per-job budget.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,
@@ -2303,12 +2261,19 @@
               "use_speaker_boost": {
                 "type": "boolean"
               },
+              "translate_captions": {
+                "default": false,
+                "description": "Default false: dub audio only and leave existing video text unchanged. Set true to translate visible captions and text; this doubles the source-minute credit cost.",
+                "type": "boolean"
+              },
               "caption_content_mode": {
                 "default": "auto",
+                "description": "Used only when translate_captions is true. auto handles subtitles and other text separately, adding speech subtitles if no text is detected; independent_text translates existing text at its original timing and position without adding speech subtitles; speech_subtitles follows dubbed speech and may cover other detected text.",
                 "type": "string",
                 "enum": ["auto", "speech_subtitles", "independent_text"]
               },
               "caption_region_override": {
+                "description": "Optional source-detection and subtitle-placement area for speech_subtitles mode, used only when caption translation is enabled.",
                 "anyOf": [
                   {
                     "type": "object",
@@ -2343,11 +2308,25 @@
                 ]
               },
               "caption_group_size": {
+                "default": 6,
+                "description": "Words per caption group when caption translation is enabled.",
                 "type": "integer",
                 "minimum": 3,
                 "maximum": 8
               },
               "caption_style": {
+                "default": {
+                  "fontFamily": "TikTok Sans",
+                  "fontSize": 64,
+                  "baseColor": "#111827",
+                  "highlightColor": "#111827",
+                  "outlineColor": "#111827",
+                  "outlineWidth": 0,
+                  "backgroundColor": "#FFFFFF",
+                  "backgroundOpacity": 100,
+                  "wordSpacing": 0
+                },
+                "description": "Appearance of translated text; ignored for audio-only dubbing.",
                 "type": "object",
                 "properties": {
                   "font_family": {
@@ -2418,10 +2397,7 @@
               "stability",
               "similarity",
               "speed",
-              "use_speaker_boost",
-              "caption_content_mode",
-              "caption_group_size",
-              "caption_style"
+              "use_speaker_boost"
             ],
             "additionalProperties": false
           },
@@ -3638,12 +3614,9 @@
                     "end",
                     "prompt",
                     "query",
-                    "enabled",
                     "asset_id",
                     "image",
-                    "provenance",
-                    "crop_x",
-                    "crop_y"
+                    "provenance"
                   ],
                   "additionalProperties": false
                 }
@@ -4887,15 +4860,6 @@
                             "additionalProperties": false
                           }
                         },
-                        "required": [
-                          "captions_enabled",
-                          "caption_mode",
-                          "caption_group_size",
-                          "caption_preset_id",
-                          "video_layout_mode",
-                          "clip_length_mode",
-                          "analysis_start_seconds"
-                        ],
                         "additionalProperties": false
                       }
                     },
@@ -5051,15 +5015,6 @@
                         "additionalProperties": false
                       }
                     },
-                    "required": [
-                      "captions_enabled",
-                      "caption_mode",
-                      "caption_group_size",
-                      "caption_preset_id",
-                      "video_layout_mode",
-                      "clip_length_mode",
-                      "analysis_start_seconds"
-                    ],
                     "additionalProperties": false
                   },
                   "project_id": {
@@ -5243,14 +5198,7 @@
                             "enum": ["natural", "cinematic", "illustration"]
                           }
                         },
-                        "required": [
-                          "mode",
-                          "captions_enabled",
-                          "start_seconds",
-                          "end_seconds",
-                          "max_shots",
-                          "style"
-                        ],
+                        "required": ["end_seconds"],
                         "additionalProperties": false
                       }
                     },
@@ -5291,14 +5239,7 @@
                         "enum": ["natural", "cinematic", "illustration"]
                       }
                     },
-                    "required": [
-                      "mode",
-                      "captions_enabled",
-                      "start_seconds",
-                      "end_seconds",
-                      "max_shots",
-                      "style"
-                    ],
+                    "required": ["end_seconds"],
                     "additionalProperties": false
                   },
                   "project_id": {
@@ -5473,16 +5414,11 @@
                             "additionalProperties": false
                           }
                         },
-                        "required": [
-                          "caption_mode",
-                          "caption_group_size",
-                          "caption_preset_id",
-                          "caption_style"
-                        ],
+                        "required": ["caption_style"],
                         "additionalProperties": false
                       }
                     },
-                    "required": ["duration_seconds", "start_seconds"],
+                    "required": ["duration_seconds"],
                     "additionalProperties": false
                   },
                   "options": {
@@ -5584,12 +5520,7 @@
                         "additionalProperties": false
                       }
                     },
-                    "required": [
-                      "caption_mode",
-                      "caption_group_size",
-                      "caption_preset_id",
-                      "caption_style"
-                    ],
+                    "required": ["caption_style"],
                     "additionalProperties": false
                   },
                   "project_id": {
@@ -6234,12 +6165,19 @@
                       "use_speaker_boost": {
                         "type": "boolean"
                       },
+                      "translate_captions": {
+                        "default": false,
+                        "description": "Default false: dub audio only and leave existing video text unchanged. Set true to translate visible captions and text; this doubles the source-minute credit cost.",
+                        "type": "boolean"
+                      },
                       "caption_content_mode": {
                         "default": "auto",
+                        "description": "Used only when translate_captions is true. auto handles subtitles and other text separately, adding speech subtitles if no text is detected; independent_text translates existing text at its original timing and position without adding speech subtitles; speech_subtitles follows dubbed speech and may cover other detected text.",
                         "type": "string",
                         "enum": ["auto", "speech_subtitles", "independent_text"]
                       },
                       "caption_region_override": {
+                        "description": "Optional source-detection and subtitle-placement area for speech_subtitles mode, used only when caption translation is enabled.",
                         "anyOf": [
                           {
                             "type": "object",
@@ -6274,11 +6212,25 @@
                         ]
                       },
                       "caption_group_size": {
+                        "default": 6,
+                        "description": "Words per caption group when caption translation is enabled.",
                         "type": "integer",
                         "minimum": 3,
                         "maximum": 8
                       },
                       "caption_style": {
+                        "default": {
+                          "fontFamily": "TikTok Sans",
+                          "fontSize": 64,
+                          "baseColor": "#111827",
+                          "highlightColor": "#111827",
+                          "outlineColor": "#111827",
+                          "outlineWidth": 0,
+                          "backgroundColor": "#FFFFFF",
+                          "backgroundOpacity": 100,
+                          "wordSpacing": 0
+                        },
+                        "description": "Appearance of translated text; ignored for audio-only dubbing.",
                         "type": "object",
                         "properties": {
                           "font_family": {
@@ -6349,10 +6301,7 @@
                       "stability",
                       "similarity",
                       "speed",
-                      "use_speaker_boost",
-                      "caption_content_mode",
-                      "caption_group_size",
-                      "caption_style"
+                      "use_speaker_boost"
                     ],
                     "additionalProperties": false
                   },
@@ -8115,15 +8064,6 @@
                             "additionalProperties": false
                           }
                         },
-                        "required": [
-                          "captions_enabled",
-                          "caption_mode",
-                          "caption_group_size",
-                          "caption_preset_id",
-                          "video_layout_mode",
-                          "clip_length_mode",
-                          "analysis_start_seconds"
-                        ],
                         "additionalProperties": false
                       }
                     },
@@ -8279,15 +8219,6 @@
                         "additionalProperties": false
                       }
                     },
-                    "required": [
-                      "captions_enabled",
-                      "caption_mode",
-                      "caption_group_size",
-                      "caption_preset_id",
-                      "video_layout_mode",
-                      "clip_length_mode",
-                      "analysis_start_seconds"
-                    ],
                     "additionalProperties": false
                   },
                   "project_id": {
@@ -8471,14 +8402,7 @@
                             "enum": ["natural", "cinematic", "illustration"]
                           }
                         },
-                        "required": [
-                          "mode",
-                          "captions_enabled",
-                          "start_seconds",
-                          "end_seconds",
-                          "max_shots",
-                          "style"
-                        ],
+                        "required": ["end_seconds"],
                         "additionalProperties": false
                       }
                     },
@@ -8519,14 +8443,7 @@
                         "enum": ["natural", "cinematic", "illustration"]
                       }
                     },
-                    "required": [
-                      "mode",
-                      "captions_enabled",
-                      "start_seconds",
-                      "end_seconds",
-                      "max_shots",
-                      "style"
-                    ],
+                    "required": ["end_seconds"],
                     "additionalProperties": false
                   },
                   "project_id": {
@@ -8701,16 +8618,11 @@
                             "additionalProperties": false
                           }
                         },
-                        "required": [
-                          "caption_mode",
-                          "caption_group_size",
-                          "caption_preset_id",
-                          "caption_style"
-                        ],
+                        "required": ["caption_style"],
                         "additionalProperties": false
                       }
                     },
-                    "required": ["duration_seconds", "start_seconds"],
+                    "required": ["duration_seconds"],
                     "additionalProperties": false
                   },
                   "options": {
@@ -8812,12 +8724,7 @@
                         "additionalProperties": false
                       }
                     },
-                    "required": [
-                      "caption_mode",
-                      "caption_group_size",
-                      "caption_preset_id",
-                      "caption_style"
-                    ],
+                    "required": ["caption_style"],
                     "additionalProperties": false
                   },
                   "project_id": {
@@ -9462,12 +9369,19 @@
                       "use_speaker_boost": {
                         "type": "boolean"
                       },
+                      "translate_captions": {
+                        "default": false,
+                        "description": "Default false: dub audio only and leave existing video text unchanged. Set true to translate visible captions and text; this doubles the source-minute credit cost.",
+                        "type": "boolean"
+                      },
                       "caption_content_mode": {
                         "default": "auto",
+                        "description": "Used only when translate_captions is true. auto handles subtitles and other text separately, adding speech subtitles if no text is detected; independent_text translates existing text at its original timing and position without adding speech subtitles; speech_subtitles follows dubbed speech and may cover other detected text.",
                         "type": "string",
                         "enum": ["auto", "speech_subtitles", "independent_text"]
                       },
                       "caption_region_override": {
+                        "description": "Optional source-detection and subtitle-placement area for speech_subtitles mode, used only when caption translation is enabled.",
                         "anyOf": [
                           {
                             "type": "object",
@@ -9502,11 +9416,25 @@
                         ]
                       },
                       "caption_group_size": {
+                        "default": 6,
+                        "description": "Words per caption group when caption translation is enabled.",
                         "type": "integer",
                         "minimum": 3,
                         "maximum": 8
                       },
                       "caption_style": {
+                        "default": {
+                          "fontFamily": "TikTok Sans",
+                          "fontSize": 64,
+                          "baseColor": "#111827",
+                          "highlightColor": "#111827",
+                          "outlineColor": "#111827",
+                          "outlineWidth": 0,
+                          "backgroundColor": "#FFFFFF",
+                          "backgroundOpacity": 100,
+                          "wordSpacing": 0
+                        },
+                        "description": "Appearance of translated text; ignored for audio-only dubbing.",
                         "type": "object",
                         "properties": {
                           "font_family": {
@@ -9577,10 +9505,7 @@
                       "stability",
                       "similarity",
                       "speed",
-                      "use_speaker_boost",
-                      "caption_content_mode",
-                      "caption_group_size",
-                      "caption_style"
+                      "use_speaker_boost"
                     ],
                     "additionalProperties": false
                   },

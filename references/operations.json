@@ -2,8 +2,8 @@
   "source": {
     "repository": "https://github.com/asterism-software/reclip-io",
     "branch": "main",
-    "commit": "dedff965e2013f9b6f223fec06b3fc793e31412b",
-    "merged_main": "dedff965e2013f9b6f223fec06b3fc793e31412b",
+    "commit": "16a98f15ec8f4bd5d5a675f77e31d655dcd79d1d",
+    "merged_main": "16a98f15ec8f4bd5d5a675f77e31d655dcd79d1d",
     "working_tree": true,
     "api_version": "1.0.0-beta.2",
     "tool_codes": [
@@ -38,7 +38,7 @@
       "video_to_gif",
       "transcription"
     ],
-    "contract_sha256": "90a696cfe77779b6cce038c94a1d477328a805d025187655f0757af7772a527d"
+    "contract_sha256": "a112c8d9c0e153f86d52f7b3dfb6f5f7f47eaff34cff7121b41c56340c5d3d78"
   },
   "operations": [
     {
