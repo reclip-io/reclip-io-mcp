@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "contract_sha256": "a112c8d9c0e153f86d52f7b3dfb6f5f7f47eaff34cff7121b41c56340c5d3d78",
+  "contract_sha256": "2850d9ddb7d57e10f8f330363d80c990a14084aab83ca8b6616f1ef1488f43df",
   "examples": [
     {
       "slug": "youtube-video-downloader",

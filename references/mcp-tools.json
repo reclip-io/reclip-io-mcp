@@ -2,8 +2,8 @@
   "source": {
     "repository": "https://github.com/asterism-software/reclip-io",
     "branch": "main",
-    "commit": "16a98f15ec8f4bd5d5a675f77e31d655dcd79d1d",
-    "merged_main": "16a98f15ec8f4bd5d5a675f77e31d655dcd79d1d",
+    "commit": "b9dccd6bbd2af1baa50e711ab717c3d79fafc420",
+    "merged_main": "b9dccd6bbd2af1baa50e711ab717c3d79fafc420",
     "working_tree": true,
     "api_version": "1.0.0-beta.2",
     "tool_codes": [
@@ -15,7 +15,6 @@
       "ai_image_generator",
       "image_background_remover",
       "ai_clipper",
-      "clip_discovery",
       "ai_broll",
       "ai_captions",
       "video_to_prompt",
@@ -27,6 +26,11 @@
       "gemini_watermark_bulk_remover",
       "ai_voiceover",
       "translate_and_dub",
+      "video_ad_translator",
+      "video_text_translator",
+      "tiktok_video_translator",
+      "instagram_video_translator",
+      "reels_translator",
       "roblox_rant",
       "video_downloader",
       "youtube_transcript",
@@ -38,7 +42,7 @@
       "video_to_gif",
       "transcription"
     ],
-    "contract_sha256": "a112c8d9c0e153f86d52f7b3dfb6f5f7f47eaff34cff7121b41c56340c5d3d78"
+    "contract_sha256": "2850d9ddb7d57e10f8f330363d80c990a14084aab83ca8b6616f1ef1488f43df"
   },
   "tools": [
     {
@@ -1030,101 +1034,6 @@
       }
     },
     {
-      "name": "reclip_clip_discovery",
-      "description": "Describe a moment to find matching video clips, adjust their timing, and download them. Quote the exact input first; maximum_credits is a hard per-job budget.",
-      "inputSchema": {
-        "type": "object",
-        "additionalProperties": false,
-        "required": ["input", "maximum_credits", "idempotency_key"],
-        "properties": {
-          "input": {
-            "$schema": "https://json-schema.org/draft/2020-12/schema",
-            "type": "object",
-            "properties": {
-              "prompt": {
-                "type": "string",
-                "minLength": 5,
-                "maxLength": 600
-              },
-              "duration": {
-                "type": "number",
-                "exclusiveMinimum": 0,
-                "maximum": 7200
-              },
-              "max_clip_seconds": {
-                "anyOf": [
-                  {
-                    "type": "number",
-                    "const": 30
-                  },
-                  {
-                    "type": "number",
-                    "const": 60
-                  },
-                  {
-                    "type": "number",
-                    "const": 90
-                  }
-                ]
-              },
-              "cues": {
-                "minItems": 1,
-                "maxItems": 6000,
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "start": {
-                      "type": "number",
-                      "minimum": 0
-                    },
-                    "end": {
-                      "type": "number",
-                      "exclusiveMinimum": 0
-                    },
-                    "text": {
-                      "type": "string",
-                      "minLength": 1,
-                      "maxLength": 2000
-                    }
-                  },
-                  "required": ["start", "end", "text"],
-                  "additionalProperties": false
-                }
-              }
-            },
-            "required": ["prompt", "duration", "max_clip_seconds", "cues"],
-            "additionalProperties": false
-          },
-          "project_id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "maximum_outputs": {
-            "type": "integer",
-            "minimum": 1,
-            "maximum": 50,
-            "description": "Clipper output target. Other tools use their fixed output count."
-          },
-          "maximum_credits": {
-            "type": "integer",
-            "minimum": 0,
-            "description": "Reject if the server estimate exceeds this budget."
-          },
-          "idempotency_key": {
-            "type": "string",
-            "pattern": "^[A-Za-z0-9:_-]{8,160}$"
-          }
-        }
-      },
-      "annotations": {
-        "readOnlyHint": false,
-        "destructiveHint": false,
-        "idempotentHint": true,
-        "openWorldHint": true
-      }
-    },
-    {
       "name": "reclip_ai_broll",
       "description": "Add relevant AI images, AI video, or stock footage to your video. Quote the exact input first; maximum_credits is a hard per-job budget.",
       "inputSchema": {
@@ -1330,6 +1239,58 @@
               "options": {
                 "type": "object",
                 "properties": {
+                  "content_mode": {
+                    "type": "string",
+                    "enum": ["speech", "visual", "text"]
+                  },
+                  "caption_cues": {
+                    "minItems": 1,
+                    "maxItems": 60,
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 80
+                        },
+                        "start_seconds": {
+                          "type": "number",
+                          "minimum": 0,
+                          "maximum": 120
+                        },
+                        "end_seconds": {
+                          "type": "number",
+                          "exclusiveMinimum": 0,
+                          "maximum": 120
+                        },
+                        "text": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 500
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "start_seconds",
+                        "end_seconds",
+                        "text"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "instructions": {
+                    "type": "string",
+                    "maxLength": 2000
+                  },
+                  "output_language": {
+                    "type": "string"
+                  },
+                  "tone": {
+                    "type": "string",
+                    "maxLength": 80
+                  },
                   "maximum_source_bytes": {
                     "type": "integer",
                     "exclusiveMinimum": 0,
@@ -1436,6 +1397,53 @@
           "options": {
             "type": "object",
             "properties": {
+              "content_mode": {
+                "type": "string",
+                "enum": ["speech", "visual", "text"]
+              },
+              "caption_cues": {
+                "minItems": 1,
+                "maxItems": 60,
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 80
+                    },
+                    "start_seconds": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 120
+                    },
+                    "end_seconds": {
+                      "type": "number",
+                      "exclusiveMinimum": 0,
+                      "maximum": 120
+                    },
+                    "text": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 500
+                    }
+                  },
+                  "required": ["id", "start_seconds", "end_seconds", "text"],
+                  "additionalProperties": false
+                }
+              },
+              "instructions": {
+                "type": "string",
+                "maxLength": 2000
+              },
+              "output_language": {
+                "type": "string"
+              },
+              "tone": {
+                "type": "string",
+                "maxLength": 80
+              },
               "maximum_source_bytes": {
                 "type": "integer",
                 "exclusiveMinimum": 0,
@@ -2224,6 +2232,11 @@
                 "minLength": 1,
                 "maxLength": 200
               },
+              "translate_audio": {
+                "default": true,
+                "description": "Default true: translate detected speech into the selected voice. Set false only with caption translation and independent_text to preserve the original audio.",
+                "type": "boolean"
+              },
               "model_id": {
                 "type": "string"
               },
@@ -2337,7 +2350,11 @@
                   "font_size": {
                     "type": "integer",
                     "minimum": 32,
-                    "maximum": 112
+                    "maximum": 240
+                  },
+                  "font_size_reference_height": {
+                    "type": "number",
+                    "const": 1920
                   },
                   "base_color": {
                     "type": "string",
@@ -2390,7 +2407,1283 @@
               "duration_seconds",
               "source_language_code",
               "target_language_code",
-              "voice_id",
+              "model_id",
+              "public_owner_id",
+              "voice_source",
+              "stability",
+              "similarity",
+              "speed",
+              "use_speaker_boost"
+            ],
+            "additionalProperties": false
+          },
+          "project_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "maximum_outputs": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 50,
+            "description": "Clipper output target. Other tools use their fixed output count."
+          },
+          "maximum_credits": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Reject if the server estimate exceeds this budget."
+          },
+          "idempotency_key": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9:_-]{8,160}$"
+          }
+        }
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true
+      }
+    },
+    {
+      "name": "reclip_video_ad_translator",
+      "description": "Translate an existing video ad’s voice, captions, product headlines, offers, and calls to action. Quote the exact input first; maximum_credits is a hard per-job budget.",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["input", "maximum_credits", "idempotency_key"],
+        "properties": {
+          "input": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "type": "object",
+            "properties": {
+              "asset_id": {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+              },
+              "file_name": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 255
+              },
+              "duration_seconds": {
+                "type": "number",
+                "exclusiveMinimum": 0,
+                "maximum": 90
+              },
+              "source_language_code": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "target_language_code": {
+                "type": "string"
+              },
+              "voice_id": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "translate_audio": {
+                "default": true,
+                "type": "boolean"
+              },
+              "model_id": {
+                "type": "string"
+              },
+              "public_owner_id": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "voice_source": {
+                "type": "string",
+                "enum": ["library", "custom"]
+              },
+              "stability": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "similarity": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "speed": {
+                "type": "number",
+                "minimum": 0.7,
+                "maximum": 1.2
+              },
+              "use_speaker_boost": {
+                "type": "boolean"
+              },
+              "translate_captions": {
+                "default": true,
+                "type": "boolean"
+              },
+              "caption_content_mode": {
+                "default": "auto",
+                "type": "string",
+                "enum": ["auto", "speech_subtitles", "independent_text"]
+              },
+              "caption_region_override": {
+                "description": "Optional source-detection and subtitle-placement area for speech_subtitles mode, used only when caption translation is enabled.",
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "x": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 100
+                      },
+                      "y": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 100
+                      },
+                      "width": {
+                        "type": "number",
+                        "minimum": 2,
+                        "maximum": 100
+                      },
+                      "height": {
+                        "type": "number",
+                        "minimum": 2,
+                        "maximum": 100
+                      }
+                    },
+                    "required": ["x", "y", "width", "height"],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "caption_group_size": {
+                "default": 6,
+                "description": "Words per caption group when caption translation is enabled.",
+                "type": "integer",
+                "minimum": 3,
+                "maximum": 8
+              },
+              "caption_style": {
+                "default": {
+                  "fontFamily": "THE BOLD FONT",
+                  "fontSize": 120,
+                  "fontSizeReferenceHeight": 1920,
+                  "baseColor": "#111827",
+                  "highlightColor": "#111827",
+                  "outlineColor": "#111827",
+                  "outlineWidth": 0,
+                  "backgroundColor": "#FFFFFF",
+                  "backgroundOpacity": 100,
+                  "wordSpacing": 0
+                },
+                "type": "object",
+                "properties": {
+                  "font_family": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100
+                  },
+                  "font_size": {
+                    "type": "integer",
+                    "minimum": 32,
+                    "maximum": 240
+                  },
+                  "font_size_reference_height": {
+                    "type": "number",
+                    "const": 1920
+                  },
+                  "base_color": {
+                    "type": "string",
+                    "pattern": "^#[0-9A-Fa-f]{6}$"
+                  },
+                  "highlight_color": {
+                    "type": "string",
+                    "pattern": "^#[0-9A-Fa-f]{6}$"
+                  },
+                  "outline_color": {
+                    "type": "string",
+                    "pattern": "^#[0-9A-Fa-f]{6}$"
+                  },
+                  "outline_width": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 20
+                  },
+                  "background_color": {
+                    "type": "string",
+                    "pattern": "^#[0-9A-Fa-f]{6}$"
+                  },
+                  "background_opacity": {
+                    "type": "number",
+                    "const": 100
+                  },
+                  "word_spacing": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30
+                  }
+                },
+                "required": [
+                  "font_family",
+                  "font_size",
+                  "base_color",
+                  "highlight_color",
+                  "outline_color",
+                  "outline_width",
+                  "background_color",
+                  "background_opacity",
+                  "word_spacing"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "asset_id",
+              "file_name",
+              "duration_seconds",
+              "source_language_code",
+              "target_language_code",
+              "model_id",
+              "public_owner_id",
+              "voice_source",
+              "stability",
+              "similarity",
+              "speed",
+              "use_speaker_boost"
+            ],
+            "additionalProperties": false
+          },
+          "project_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "maximum_outputs": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 50,
+            "description": "Clipper output target. Other tools use their fixed output count."
+          },
+          "maximum_credits": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Reject if the server estimate exceeds this budget."
+          },
+          "idempotency_key": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9:_-]{8,160}$"
+          }
+        }
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true
+      }
+    },
+    {
+      "name": "reclip_video_text_translator",
+      "description": "Translate visible text in an existing video while keeping its original speech, music, and sound. Quote the exact input first; maximum_credits is a hard per-job budget.",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["input", "maximum_credits", "idempotency_key"],
+        "properties": {
+          "input": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "type": "object",
+            "properties": {
+              "asset_id": {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+              },
+              "file_name": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 255
+              },
+              "duration_seconds": {
+                "type": "number",
+                "exclusiveMinimum": 0,
+                "maximum": 90
+              },
+              "source_language_code": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "target_language_code": {
+                "type": "string"
+              },
+              "voice_id": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "translate_audio": {
+                "default": false,
+                "type": "boolean",
+                "const": false
+              },
+              "model_id": {
+                "type": "string"
+              },
+              "public_owner_id": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "voice_source": {
+                "type": "string",
+                "enum": ["library", "custom"]
+              },
+              "stability": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "similarity": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "speed": {
+                "type": "number",
+                "minimum": 0.7,
+                "maximum": 1.2
+              },
+              "use_speaker_boost": {
+                "type": "boolean"
+              },
+              "translate_captions": {
+                "default": true,
+                "type": "boolean",
+                "const": true
+              },
+              "caption_content_mode": {
+                "default": "independent_text",
+                "type": "string",
+                "const": "independent_text"
+              },
+              "caption_region_override": {
+                "description": "Optional source-detection and subtitle-placement area for speech_subtitles mode, used only when caption translation is enabled.",
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "x": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 100
+                      },
+                      "y": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 100
+                      },
+                      "width": {
+                        "type": "number",
+                        "minimum": 2,
+                        "maximum": 100
+                      },
+                      "height": {
+                        "type": "number",
+                        "minimum": 2,
+                        "maximum": 100
+                      }
+                    },
+                    "required": ["x", "y", "width", "height"],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "caption_group_size": {
+                "default": 6,
+                "description": "Words per caption group when caption translation is enabled.",
+                "type": "integer",
+                "minimum": 3,
+                "maximum": 8
+              },
+              "caption_style": {
+                "default": {
+                  "fontFamily": "THE BOLD FONT",
+                  "fontSize": 120,
+                  "fontSizeReferenceHeight": 1920,
+                  "baseColor": "#111827",
+                  "highlightColor": "#111827",
+                  "outlineColor": "#111827",
+                  "outlineWidth": 0,
+                  "backgroundColor": "#FFFFFF",
+                  "backgroundOpacity": 100,
+                  "wordSpacing": 0
+                },
+                "type": "object",
+                "properties": {
+                  "font_family": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100
+                  },
+                  "font_size": {
+                    "type": "integer",
+                    "minimum": 32,
+                    "maximum": 240
+                  },
+                  "font_size_reference_height": {
+                    "type": "number",
+                    "const": 1920
+                  },
+                  "base_color": {
+                    "type": "string",
+                    "pattern": "^#[0-9A-Fa-f]{6}$"
+                  },
+                  "highlight_color": {
+                    "type": "string",
+                    "pattern": "^#[0-9A-Fa-f]{6}$"
+                  },
+                  "outline_color": {
+                    "type": "string",
+                    "pattern": "^#[0-9A-Fa-f]{6}$"
+                  },
+                  "outline_width": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 20
+                  },
+                  "background_color": {
+                    "type": "string",
+                    "pattern": "^#[0-9A-Fa-f]{6}$"
+                  },
+                  "background_opacity": {
+                    "type": "number",
+                    "const": 100
+                  },
+                  "word_spacing": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30
+                  }
+                },
+                "required": [
+                  "font_family",
+                  "font_size",
+                  "base_color",
+                  "highlight_color",
+                  "outline_color",
+                  "outline_width",
+                  "background_color",
+                  "background_opacity",
+                  "word_spacing"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "asset_id",
+              "file_name",
+              "duration_seconds",
+              "source_language_code",
+              "target_language_code",
+              "model_id",
+              "public_owner_id",
+              "voice_source",
+              "stability",
+              "similarity",
+              "speed",
+              "use_speaker_boost"
+            ],
+            "additionalProperties": false
+          },
+          "project_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "maximum_outputs": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 50,
+            "description": "Clipper output target. Other tools use their fixed output count."
+          },
+          "maximum_credits": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Reject if the server estimate exceeds this budget."
+          },
+          "idempotency_key": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9:_-]{8,160}$"
+          }
+        }
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true
+      }
+    },
+    {
+      "name": "reclip_tiktok_video_translator",
+      "description": "Translate uploaded TikTok product videos and ads into another language with voice and optional captions. Quote the exact input first; maximum_credits is a hard per-job budget.",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["input", "maximum_credits", "idempotency_key"],
+        "properties": {
+          "input": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "type": "object",
+            "properties": {
+              "asset_id": {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+              },
+              "file_name": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 255
+              },
+              "duration_seconds": {
+                "type": "number",
+                "exclusiveMinimum": 0,
+                "maximum": 90
+              },
+              "source_language_code": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "target_language_code": {
+                "type": "string"
+              },
+              "voice_id": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "translate_audio": {
+                "default": true,
+                "type": "boolean"
+              },
+              "model_id": {
+                "type": "string"
+              },
+              "public_owner_id": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "voice_source": {
+                "type": "string",
+                "enum": ["library", "custom"]
+              },
+              "stability": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "similarity": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "speed": {
+                "type": "number",
+                "minimum": 0.7,
+                "maximum": 1.2
+              },
+              "use_speaker_boost": {
+                "type": "boolean"
+              },
+              "translate_captions": {
+                "default": true,
+                "type": "boolean"
+              },
+              "caption_content_mode": {
+                "default": "auto",
+                "type": "string",
+                "enum": ["auto", "speech_subtitles", "independent_text"]
+              },
+              "caption_region_override": {
+                "description": "Optional source-detection and subtitle-placement area for speech_subtitles mode, used only when caption translation is enabled.",
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "x": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 100
+                      },
+                      "y": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 100
+                      },
+                      "width": {
+                        "type": "number",
+                        "minimum": 2,
+                        "maximum": 100
+                      },
+                      "height": {
+                        "type": "number",
+                        "minimum": 2,
+                        "maximum": 100
+                      }
+                    },
+                    "required": ["x", "y", "width", "height"],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "caption_group_size": {
+                "default": 6,
+                "description": "Words per caption group when caption translation is enabled.",
+                "type": "integer",
+                "minimum": 3,
+                "maximum": 8
+              },
+              "caption_style": {
+                "default": {
+                  "fontFamily": "THE BOLD FONT",
+                  "fontSize": 120,
+                  "fontSizeReferenceHeight": 1920,
+                  "baseColor": "#111827",
+                  "highlightColor": "#111827",
+                  "outlineColor": "#111827",
+                  "outlineWidth": 0,
+                  "backgroundColor": "#FFFFFF",
+                  "backgroundOpacity": 100,
+                  "wordSpacing": 0
+                },
+                "type": "object",
+                "properties": {
+                  "font_family": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100
+                  },
+                  "font_size": {
+                    "type": "integer",
+                    "minimum": 32,
+                    "maximum": 240
+                  },
+                  "font_size_reference_height": {
+                    "type": "number",
+                    "const": 1920
+                  },
+                  "base_color": {
+                    "type": "string",
+                    "pattern": "^#[0-9A-Fa-f]{6}$"
+                  },
+                  "highlight_color": {
+                    "type": "string",
+                    "pattern": "^#[0-9A-Fa-f]{6}$"
+                  },
+                  "outline_color": {
+                    "type": "string",
+                    "pattern": "^#[0-9A-Fa-f]{6}$"
+                  },
+                  "outline_width": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 20
+                  },
+                  "background_color": {
+                    "type": "string",
+                    "pattern": "^#[0-9A-Fa-f]{6}$"
+                  },
+                  "background_opacity": {
+                    "type": "number",
+                    "const": 100
+                  },
+                  "word_spacing": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30
+                  }
+                },
+                "required": [
+                  "font_family",
+                  "font_size",
+                  "base_color",
+                  "highlight_color",
+                  "outline_color",
+                  "outline_width",
+                  "background_color",
+                  "background_opacity",
+                  "word_spacing"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "asset_id",
+              "file_name",
+              "duration_seconds",
+              "source_language_code",
+              "target_language_code",
+              "model_id",
+              "public_owner_id",
+              "voice_source",
+              "stability",
+              "similarity",
+              "speed",
+              "use_speaker_boost"
+            ],
+            "additionalProperties": false
+          },
+          "project_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "maximum_outputs": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 50,
+            "description": "Clipper output target. Other tools use their fixed output count."
+          },
+          "maximum_credits": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Reject if the server estimate exceeds this budget."
+          },
+          "idempotency_key": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9:_-]{8,160}$"
+          }
+        }
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true
+      }
+    },
+    {
+      "name": "reclip_instagram_video_translator",
+      "description": "Translate uploaded Instagram product videos with a new voice and optional translated captions and text. Quote the exact input first; maximum_credits is a hard per-job budget.",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["input", "maximum_credits", "idempotency_key"],
+        "properties": {
+          "input": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "type": "object",
+            "properties": {
+              "asset_id": {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+              },
+              "file_name": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 255
+              },
+              "duration_seconds": {
+                "type": "number",
+                "exclusiveMinimum": 0,
+                "maximum": 90
+              },
+              "source_language_code": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "target_language_code": {
+                "type": "string"
+              },
+              "voice_id": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "translate_audio": {
+                "default": true,
+                "type": "boolean"
+              },
+              "model_id": {
+                "type": "string"
+              },
+              "public_owner_id": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "voice_source": {
+                "type": "string",
+                "enum": ["library", "custom"]
+              },
+              "stability": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "similarity": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "speed": {
+                "type": "number",
+                "minimum": 0.7,
+                "maximum": 1.2
+              },
+              "use_speaker_boost": {
+                "type": "boolean"
+              },
+              "translate_captions": {
+                "default": true,
+                "type": "boolean"
+              },
+              "caption_content_mode": {
+                "default": "auto",
+                "type": "string",
+                "enum": ["auto", "speech_subtitles", "independent_text"]
+              },
+              "caption_region_override": {
+                "description": "Optional source-detection and subtitle-placement area for speech_subtitles mode, used only when caption translation is enabled.",
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "x": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 100
+                      },
+                      "y": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 100
+                      },
+                      "width": {
+                        "type": "number",
+                        "minimum": 2,
+                        "maximum": 100
+                      },
+                      "height": {
+                        "type": "number",
+                        "minimum": 2,
+                        "maximum": 100
+                      }
+                    },
+                    "required": ["x", "y", "width", "height"],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "caption_group_size": {
+                "default": 6,
+                "description": "Words per caption group when caption translation is enabled.",
+                "type": "integer",
+                "minimum": 3,
+                "maximum": 8
+              },
+              "caption_style": {
+                "default": {
+                  "fontFamily": "THE BOLD FONT",
+                  "fontSize": 120,
+                  "fontSizeReferenceHeight": 1920,
+                  "baseColor": "#111827",
+                  "highlightColor": "#111827",
+                  "outlineColor": "#111827",
+                  "outlineWidth": 0,
+                  "backgroundColor": "#FFFFFF",
+                  "backgroundOpacity": 100,
+                  "wordSpacing": 0
+                },
+                "type": "object",
+                "properties": {
+                  "font_family": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100
+                  },
+                  "font_size": {
+                    "type": "integer",
+                    "minimum": 32,
+                    "maximum": 240
+                  },
+                  "font_size_reference_height": {
+                    "type": "number",
+                    "const": 1920
+                  },
+                  "base_color": {
+                    "type": "string",
+                    "pattern": "^#[0-9A-Fa-f]{6}$"
+                  },
+                  "highlight_color": {
+                    "type": "string",
+                    "pattern": "^#[0-9A-Fa-f]{6}$"
+                  },
+                  "outline_color": {
+                    "type": "string",
+                    "pattern": "^#[0-9A-Fa-f]{6}$"
+                  },
+                  "outline_width": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 20
+                  },
+                  "background_color": {
+                    "type": "string",
+                    "pattern": "^#[0-9A-Fa-f]{6}$"
+                  },
+                  "background_opacity": {
+                    "type": "number",
+                    "const": 100
+                  },
+                  "word_spacing": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30
+                  }
+                },
+                "required": [
+                  "font_family",
+                  "font_size",
+                  "base_color",
+                  "highlight_color",
+                  "outline_color",
+                  "outline_width",
+                  "background_color",
+                  "background_opacity",
+                  "word_spacing"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "asset_id",
+              "file_name",
+              "duration_seconds",
+              "source_language_code",
+              "target_language_code",
+              "model_id",
+              "public_owner_id",
+              "voice_source",
+              "stability",
+              "similarity",
+              "speed",
+              "use_speaker_boost"
+            ],
+            "additionalProperties": false
+          },
+          "project_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "maximum_outputs": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 50,
+            "description": "Clipper output target. Other tools use their fixed output count."
+          },
+          "maximum_credits": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Reject if the server estimate exceeds this budget."
+          },
+          "idempotency_key": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9:_-]{8,160}$"
+          }
+        }
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true
+      }
+    },
+    {
+      "name": "reclip_reels_translator",
+      "description": "Translate uploaded Instagram and Facebook Reels with voice, captions, and product text. Quote the exact input first; maximum_credits is a hard per-job budget.",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["input", "maximum_credits", "idempotency_key"],
+        "properties": {
+          "input": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "type": "object",
+            "properties": {
+              "asset_id": {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+              },
+              "file_name": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 255
+              },
+              "duration_seconds": {
+                "type": "number",
+                "exclusiveMinimum": 0,
+                "maximum": 90
+              },
+              "source_language_code": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "target_language_code": {
+                "type": "string"
+              },
+              "voice_id": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "translate_audio": {
+                "default": true,
+                "type": "boolean"
+              },
+              "model_id": {
+                "type": "string"
+              },
+              "public_owner_id": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "voice_source": {
+                "type": "string",
+                "enum": ["library", "custom"]
+              },
+              "stability": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "similarity": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "speed": {
+                "type": "number",
+                "minimum": 0.7,
+                "maximum": 1.2
+              },
+              "use_speaker_boost": {
+                "type": "boolean"
+              },
+              "translate_captions": {
+                "default": true,
+                "type": "boolean"
+              },
+              "caption_content_mode": {
+                "default": "auto",
+                "type": "string",
+                "enum": ["auto", "speech_subtitles", "independent_text"]
+              },
+              "caption_region_override": {
+                "description": "Optional source-detection and subtitle-placement area for speech_subtitles mode, used only when caption translation is enabled.",
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "x": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 100
+                      },
+                      "y": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 100
+                      },
+                      "width": {
+                        "type": "number",
+                        "minimum": 2,
+                        "maximum": 100
+                      },
+                      "height": {
+                        "type": "number",
+                        "minimum": 2,
+                        "maximum": 100
+                      }
+                    },
+                    "required": ["x", "y", "width", "height"],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "caption_group_size": {
+                "default": 6,
+                "description": "Words per caption group when caption translation is enabled.",
+                "type": "integer",
+                "minimum": 3,
+                "maximum": 8
+              },
+              "caption_style": {
+                "default": {
+                  "fontFamily": "THE BOLD FONT",
+                  "fontSize": 120,
+                  "fontSizeReferenceHeight": 1920,
+                  "baseColor": "#111827",
+                  "highlightColor": "#111827",
+                  "outlineColor": "#111827",
+                  "outlineWidth": 0,
+                  "backgroundColor": "#FFFFFF",
+                  "backgroundOpacity": 100,
+                  "wordSpacing": 0
+                },
+                "type": "object",
+                "properties": {
+                  "font_family": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100
+                  },
+                  "font_size": {
+                    "type": "integer",
+                    "minimum": 32,
+                    "maximum": 240
+                  },
+                  "font_size_reference_height": {
+                    "type": "number",
+                    "const": 1920
+                  },
+                  "base_color": {
+                    "type": "string",
+                    "pattern": "^#[0-9A-Fa-f]{6}$"
+                  },
+                  "highlight_color": {
+                    "type": "string",
+                    "pattern": "^#[0-9A-Fa-f]{6}$"
+                  },
+                  "outline_color": {
+                    "type": "string",
+                    "pattern": "^#[0-9A-Fa-f]{6}$"
+                  },
+                  "outline_width": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 20
+                  },
+                  "background_color": {
+                    "type": "string",
+                    "pattern": "^#[0-9A-Fa-f]{6}$"
+                  },
+                  "background_opacity": {
+                    "type": "number",
+                    "const": 100
+                  },
+                  "word_spacing": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30
+                  }
+                },
+                "required": [
+                  "font_family",
+                  "font_size",
+                  "base_color",
+                  "highlight_color",
+                  "outline_color",
+                  "outline_width",
+                  "background_color",
+                  "background_opacity",
+                  "word_spacing"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "asset_id",
+              "file_name",
+              "duration_seconds",
+              "source_language_code",
+              "target_language_code",
               "model_id",
               "public_owner_id",
               "voice_source",
@@ -3888,7 +5181,6 @@
               "ai_image_generator",
               "image_background_remover",
               "ai_clipper",
-              "clip_discovery",
               "ai_broll",
               "ai_captions",
               "video_to_prompt",
@@ -3900,6 +5192,11 @@
               "gemini_watermark_bulk_remover",
               "ai_voiceover",
               "translate_and_dub",
+              "video_ad_translator",
+              "video_text_translator",
+              "tiktok_video_translator",
+              "instagram_video_translator",
+              "reels_translator",
               "roblox_rant",
               "video_downloader",
               "youtube_transcript",
@@ -3940,7 +5237,6 @@
               "ai_image_generator",
               "image_background_remover",
               "ai_clipper",
-              "clip_discovery",
               "ai_broll",
               "ai_captions",
               "video_to_prompt",
@@ -3952,6 +5248,11 @@
               "gemini_watermark_bulk_remover",
               "ai_voiceover",
               "translate_and_dub",
+              "video_ad_translator",
+              "video_text_translator",
+              "tiktok_video_translator",
+              "instagram_video_translator",
+              "reels_translator",
               "roblox_rant",
               "video_downloader",
               "youtube_transcript",
@@ -3996,7 +5297,6 @@
                   "ai_image_generator",
                   "image_background_remover",
                   "ai_clipper",
-                  "clip_discovery",
                   "ai_broll",
                   "ai_captions",
                   "video_to_prompt",
@@ -4008,6 +5308,11 @@
                   "gemini_watermark_bulk_remover",
                   "ai_voiceover",
                   "translate_and_dub",
+                  "video_ad_translator",
+                  "video_text_translator",
+                  "tiktok_video_translator",
+                  "instagram_video_translator",
+                  "reels_translator",
                   "roblox_rant",
                   "video_downloader",
                   "youtube_transcript",
@@ -5038,95 +6343,6 @@
                 "type": "object",
                 "additionalProperties": false,
                 "required": ["tool", "input"],
-                "properties": {
-                  "tool": {
-                    "const": "clip_discovery"
-                  },
-                  "input": {
-                    "$schema": "https://json-schema.org/draft/2020-12/schema",
-                    "type": "object",
-                    "properties": {
-                      "prompt": {
-                        "type": "string",
-                        "minLength": 5,
-                        "maxLength": 600
-                      },
-                      "duration": {
-                        "type": "number",
-                        "exclusiveMinimum": 0,
-                        "maximum": 7200
-                      },
-                      "max_clip_seconds": {
-                        "anyOf": [
-                          {
-                            "type": "number",
-                            "const": 30
-                          },
-                          {
-                            "type": "number",
-                            "const": 60
-                          },
-                          {
-                            "type": "number",
-                            "const": 90
-                          }
-                        ]
-                      },
-                      "cues": {
-                        "minItems": 1,
-                        "maxItems": 6000,
-                        "type": "array",
-                        "items": {
-                          "type": "object",
-                          "properties": {
-                            "start": {
-                              "type": "number",
-                              "minimum": 0
-                            },
-                            "end": {
-                              "type": "number",
-                              "exclusiveMinimum": 0
-                            },
-                            "text": {
-                              "type": "string",
-                              "minLength": 1,
-                              "maxLength": 2000
-                            }
-                          },
-                          "required": ["start", "end", "text"],
-                          "additionalProperties": false
-                        }
-                      }
-                    },
-                    "required": [
-                      "prompt",
-                      "duration",
-                      "max_clip_seconds",
-                      "cues"
-                    ],
-                    "additionalProperties": false
-                  },
-                  "project_id": {
-                    "type": "string",
-                    "format": "uuid"
-                  },
-                  "maximum_outputs": {
-                    "type": "integer",
-                    "minimum": 1,
-                    "maximum": 50,
-                    "description": "Clipper output target. Other tools use their fixed output count."
-                  },
-                  "maximum_credits": {
-                    "type": "integer",
-                    "minimum": 0,
-                    "description": "Reject if the server estimate exceeds this budget."
-                  }
-                }
-              },
-              {
-                "type": "object",
-                "additionalProperties": false,
-                "required": ["tool", "input"],
                 "not": {
                   "required": ["options"],
                   "properties": {
@@ -5318,6 +6534,58 @@
                       "options": {
                         "type": "object",
                         "properties": {
+                          "content_mode": {
+                            "type": "string",
+                            "enum": ["speech", "visual", "text"]
+                          },
+                          "caption_cues": {
+                            "minItems": 1,
+                            "maxItems": 60,
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "id": {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "maxLength": 80
+                                },
+                                "start_seconds": {
+                                  "type": "number",
+                                  "minimum": 0,
+                                  "maximum": 120
+                                },
+                                "end_seconds": {
+                                  "type": "number",
+                                  "exclusiveMinimum": 0,
+                                  "maximum": 120
+                                },
+                                "text": {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "maxLength": 500
+                                }
+                              },
+                              "required": [
+                                "id",
+                                "start_seconds",
+                                "end_seconds",
+                                "text"
+                              ],
+                              "additionalProperties": false
+                            }
+                          },
+                          "instructions": {
+                            "type": "string",
+                            "maxLength": 2000
+                          },
+                          "output_language": {
+                            "type": "string"
+                          },
+                          "tone": {
+                            "type": "string",
+                            "maxLength": 80
+                          },
                           "maximum_source_bytes": {
                             "type": "integer",
                             "exclusiveMinimum": 0,
@@ -5424,6 +6692,58 @@
                   "options": {
                     "type": "object",
                     "properties": {
+                      "content_mode": {
+                        "type": "string",
+                        "enum": ["speech", "visual", "text"]
+                      },
+                      "caption_cues": {
+                        "minItems": 1,
+                        "maxItems": 60,
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 80
+                            },
+                            "start_seconds": {
+                              "type": "number",
+                              "minimum": 0,
+                              "maximum": 120
+                            },
+                            "end_seconds": {
+                              "type": "number",
+                              "exclusiveMinimum": 0,
+                              "maximum": 120
+                            },
+                            "text": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 500
+                            }
+                          },
+                          "required": [
+                            "id",
+                            "start_seconds",
+                            "end_seconds",
+                            "text"
+                          ],
+                          "additionalProperties": false
+                        }
+                      },
+                      "instructions": {
+                        "type": "string",
+                        "maxLength": 2000
+                      },
+                      "output_language": {
+                        "type": "string"
+                      },
+                      "tone": {
+                        "type": "string",
+                        "maxLength": 80
+                      },
                       "maximum_source_bytes": {
                         "type": "integer",
                         "exclusiveMinimum": 0,
@@ -6128,6 +7448,11 @@
                         "minLength": 1,
                         "maxLength": 200
                       },
+                      "translate_audio": {
+                        "default": true,
+                        "description": "Default true: translate detected speech into the selected voice. Set false only with caption translation and independent_text to preserve the original audio.",
+                        "type": "boolean"
+                      },
                       "model_id": {
                         "type": "string"
                       },
@@ -6241,7 +7566,11 @@
                           "font_size": {
                             "type": "integer",
                             "minimum": 32,
-                            "maximum": 112
+                            "maximum": 240
+                          },
+                          "font_size_reference_height": {
+                            "type": "number",
+                            "const": 1920
                           },
                           "base_color": {
                             "type": "string",
@@ -6294,7 +7623,1228 @@
                       "duration_seconds",
                       "source_language_code",
                       "target_language_code",
-                      "voice_id",
+                      "model_id",
+                      "public_owner_id",
+                      "voice_source",
+                      "stability",
+                      "similarity",
+                      "speed",
+                      "use_speaker_boost"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "project_id": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "maximum_outputs": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 50,
+                    "description": "Clipper output target. Other tools use their fixed output count."
+                  },
+                  "maximum_credits": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "description": "Reject if the server estimate exceeds this budget."
+                  }
+                }
+              },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["tool", "input"],
+                "properties": {
+                  "tool": {
+                    "const": "video_ad_translator"
+                  },
+                  "input": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "type": "object",
+                    "properties": {
+                      "asset_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                      },
+                      "file_name": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 255
+                      },
+                      "duration_seconds": {
+                        "type": "number",
+                        "exclusiveMinimum": 0,
+                        "maximum": 90
+                      },
+                      "source_language_code": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "target_language_code": {
+                        "type": "string"
+                      },
+                      "voice_id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
+                      },
+                      "translate_audio": {
+                        "default": true,
+                        "type": "boolean"
+                      },
+                      "model_id": {
+                        "type": "string"
+                      },
+                      "public_owner_id": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 200
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "voice_source": {
+                        "type": "string",
+                        "enum": ["library", "custom"]
+                      },
+                      "stability": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 1
+                      },
+                      "similarity": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 1
+                      },
+                      "speed": {
+                        "type": "number",
+                        "minimum": 0.7,
+                        "maximum": 1.2
+                      },
+                      "use_speaker_boost": {
+                        "type": "boolean"
+                      },
+                      "translate_captions": {
+                        "default": true,
+                        "type": "boolean"
+                      },
+                      "caption_content_mode": {
+                        "default": "auto",
+                        "type": "string",
+                        "enum": ["auto", "speech_subtitles", "independent_text"]
+                      },
+                      "caption_region_override": {
+                        "description": "Optional source-detection and subtitle-placement area for speech_subtitles mode, used only when caption translation is enabled.",
+                        "anyOf": [
+                          {
+                            "type": "object",
+                            "properties": {
+                              "x": {
+                                "type": "number",
+                                "minimum": 0,
+                                "maximum": 100
+                              },
+                              "y": {
+                                "type": "number",
+                                "minimum": 0,
+                                "maximum": 100
+                              },
+                              "width": {
+                                "type": "number",
+                                "minimum": 2,
+                                "maximum": 100
+                              },
+                              "height": {
+                                "type": "number",
+                                "minimum": 2,
+                                "maximum": 100
+                              }
+                            },
+                            "required": ["x", "y", "width", "height"],
+                            "additionalProperties": false
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "caption_group_size": {
+                        "default": 6,
+                        "description": "Words per caption group when caption translation is enabled.",
+                        "type": "integer",
+                        "minimum": 3,
+                        "maximum": 8
+                      },
+                      "caption_style": {
+                        "default": {
+                          "fontFamily": "THE BOLD FONT",
+                          "fontSize": 120,
+                          "fontSizeReferenceHeight": 1920,
+                          "baseColor": "#111827",
+                          "highlightColor": "#111827",
+                          "outlineColor": "#111827",
+                          "outlineWidth": 0,
+                          "backgroundColor": "#FFFFFF",
+                          "backgroundOpacity": 100,
+                          "wordSpacing": 0
+                        },
+                        "type": "object",
+                        "properties": {
+                          "font_family": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 100
+                          },
+                          "font_size": {
+                            "type": "integer",
+                            "minimum": 32,
+                            "maximum": 240
+                          },
+                          "font_size_reference_height": {
+                            "type": "number",
+                            "const": 1920
+                          },
+                          "base_color": {
+                            "type": "string",
+                            "pattern": "^#[0-9A-Fa-f]{6}$"
+                          },
+                          "highlight_color": {
+                            "type": "string",
+                            "pattern": "^#[0-9A-Fa-f]{6}$"
+                          },
+                          "outline_color": {
+                            "type": "string",
+                            "pattern": "^#[0-9A-Fa-f]{6}$"
+                          },
+                          "outline_width": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 20
+                          },
+                          "background_color": {
+                            "type": "string",
+                            "pattern": "^#[0-9A-Fa-f]{6}$"
+                          },
+                          "background_opacity": {
+                            "type": "number",
+                            "const": 100
+                          },
+                          "word_spacing": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 30
+                          }
+                        },
+                        "required": [
+                          "font_family",
+                          "font_size",
+                          "base_color",
+                          "highlight_color",
+                          "outline_color",
+                          "outline_width",
+                          "background_color",
+                          "background_opacity",
+                          "word_spacing"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "required": [
+                      "asset_id",
+                      "file_name",
+                      "duration_seconds",
+                      "source_language_code",
+                      "target_language_code",
+                      "model_id",
+                      "public_owner_id",
+                      "voice_source",
+                      "stability",
+                      "similarity",
+                      "speed",
+                      "use_speaker_boost"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "project_id": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "maximum_outputs": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 50,
+                    "description": "Clipper output target. Other tools use their fixed output count."
+                  },
+                  "maximum_credits": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "description": "Reject if the server estimate exceeds this budget."
+                  }
+                }
+              },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["tool", "input"],
+                "properties": {
+                  "tool": {
+                    "const": "video_text_translator"
+                  },
+                  "input": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "type": "object",
+                    "properties": {
+                      "asset_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                      },
+                      "file_name": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 255
+                      },
+                      "duration_seconds": {
+                        "type": "number",
+                        "exclusiveMinimum": 0,
+                        "maximum": 90
+                      },
+                      "source_language_code": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "target_language_code": {
+                        "type": "string"
+                      },
+                      "voice_id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
+                      },
+                      "translate_audio": {
+                        "default": false,
+                        "type": "boolean",
+                        "const": false
+                      },
+                      "model_id": {
+                        "type": "string"
+                      },
+                      "public_owner_id": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 200
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "voice_source": {
+                        "type": "string",
+                        "enum": ["library", "custom"]
+                      },
+                      "stability": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 1
+                      },
+                      "similarity": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 1
+                      },
+                      "speed": {
+                        "type": "number",
+                        "minimum": 0.7,
+                        "maximum": 1.2
+                      },
+                      "use_speaker_boost": {
+                        "type": "boolean"
+                      },
+                      "translate_captions": {
+                        "default": true,
+                        "type": "boolean",
+                        "const": true
+                      },
+                      "caption_content_mode": {
+                        "default": "independent_text",
+                        "type": "string",
+                        "const": "independent_text"
+                      },
+                      "caption_region_override": {
+                        "description": "Optional source-detection and subtitle-placement area for speech_subtitles mode, used only when caption translation is enabled.",
+                        "anyOf": [
+                          {
+                            "type": "object",
+                            "properties": {
+                              "x": {
+                                "type": "number",
+                                "minimum": 0,
+                                "maximum": 100
+                              },
+                              "y": {
+                                "type": "number",
+                                "minimum": 0,
+                                "maximum": 100
+                              },
+                              "width": {
+                                "type": "number",
+                                "minimum": 2,
+                                "maximum": 100
+                              },
+                              "height": {
+                                "type": "number",
+                                "minimum": 2,
+                                "maximum": 100
+                              }
+                            },
+                            "required": ["x", "y", "width", "height"],
+                            "additionalProperties": false
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "caption_group_size": {
+                        "default": 6,
+                        "description": "Words per caption group when caption translation is enabled.",
+                        "type": "integer",
+                        "minimum": 3,
+                        "maximum": 8
+                      },
+                      "caption_style": {
+                        "default": {
+                          "fontFamily": "THE BOLD FONT",
+                          "fontSize": 120,
+                          "fontSizeReferenceHeight": 1920,
+                          "baseColor": "#111827",
+                          "highlightColor": "#111827",
+                          "outlineColor": "#111827",
+                          "outlineWidth": 0,
+                          "backgroundColor": "#FFFFFF",
+                          "backgroundOpacity": 100,
+                          "wordSpacing": 0
+                        },
+                        "type": "object",
+                        "properties": {
+                          "font_family": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 100
+                          },
+                          "font_size": {
+                            "type": "integer",
+                            "minimum": 32,
+                            "maximum": 240
+                          },
+                          "font_size_reference_height": {
+                            "type": "number",
+                            "const": 1920
+                          },
+                          "base_color": {
+                            "type": "string",
+                            "pattern": "^#[0-9A-Fa-f]{6}$"
+                          },
+                          "highlight_color": {
+                            "type": "string",
+                            "pattern": "^#[0-9A-Fa-f]{6}$"
+                          },
+                          "outline_color": {
+                            "type": "string",
+                            "pattern": "^#[0-9A-Fa-f]{6}$"
+                          },
+                          "outline_width": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 20
+                          },
+                          "background_color": {
+                            "type": "string",
+                            "pattern": "^#[0-9A-Fa-f]{6}$"
+                          },
+                          "background_opacity": {
+                            "type": "number",
+                            "const": 100
+                          },
+                          "word_spacing": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 30
+                          }
+                        },
+                        "required": [
+                          "font_family",
+                          "font_size",
+                          "base_color",
+                          "highlight_color",
+                          "outline_color",
+                          "outline_width",
+                          "background_color",
+                          "background_opacity",
+                          "word_spacing"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "required": [
+                      "asset_id",
+                      "file_name",
+                      "duration_seconds",
+                      "source_language_code",
+                      "target_language_code",
+                      "model_id",
+                      "public_owner_id",
+                      "voice_source",
+                      "stability",
+                      "similarity",
+                      "speed",
+                      "use_speaker_boost"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "project_id": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "maximum_outputs": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 50,
+                    "description": "Clipper output target. Other tools use their fixed output count."
+                  },
+                  "maximum_credits": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "description": "Reject if the server estimate exceeds this budget."
+                  }
+                }
+              },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["tool", "input"],
+                "properties": {
+                  "tool": {
+                    "const": "tiktok_video_translator"
+                  },
+                  "input": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "type": "object",
+                    "properties": {
+                      "asset_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                      },
+                      "file_name": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 255
+                      },
+                      "duration_seconds": {
+                        "type": "number",
+                        "exclusiveMinimum": 0,
+                        "maximum": 90
+                      },
+                      "source_language_code": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "target_language_code": {
+                        "type": "string"
+                      },
+                      "voice_id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
+                      },
+                      "translate_audio": {
+                        "default": true,
+                        "type": "boolean"
+                      },
+                      "model_id": {
+                        "type": "string"
+                      },
+                      "public_owner_id": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 200
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "voice_source": {
+                        "type": "string",
+                        "enum": ["library", "custom"]
+                      },
+                      "stability": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 1
+                      },
+                      "similarity": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 1
+                      },
+                      "speed": {
+                        "type": "number",
+                        "minimum": 0.7,
+                        "maximum": 1.2
+                      },
+                      "use_speaker_boost": {
+                        "type": "boolean"
+                      },
+                      "translate_captions": {
+                        "default": true,
+                        "type": "boolean"
+                      },
+                      "caption_content_mode": {
+                        "default": "auto",
+                        "type": "string",
+                        "enum": ["auto", "speech_subtitles", "independent_text"]
+                      },
+                      "caption_region_override": {
+                        "description": "Optional source-detection and subtitle-placement area for speech_subtitles mode, used only when caption translation is enabled.",
+                        "anyOf": [
+                          {
+                            "type": "object",
+                            "properties": {
+                              "x": {
+                                "type": "number",
+                                "minimum": 0,
+                                "maximum": 100
+                              },
+                              "y": {
+                                "type": "number",
+                                "minimum": 0,
+                                "maximum": 100
+                              },
+                              "width": {
+                                "type": "number",
+                                "minimum": 2,
+                                "maximum": 100
+                              },
+                              "height": {
+                                "type": "number",
+                                "minimum": 2,
+                                "maximum": 100
+                              }
+                            },
+                            "required": ["x", "y", "width", "height"],
+                            "additionalProperties": false
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "caption_group_size": {
+                        "default": 6,
+                        "description": "Words per caption group when caption translation is enabled.",
+                        "type": "integer",
+                        "minimum": 3,
+                        "maximum": 8
+                      },
+                      "caption_style": {
+                        "default": {
+                          "fontFamily": "THE BOLD FONT",
+                          "fontSize": 120,
+                          "fontSizeReferenceHeight": 1920,
+                          "baseColor": "#111827",
+                          "highlightColor": "#111827",
+                          "outlineColor": "#111827",
+                          "outlineWidth": 0,
+                          "backgroundColor": "#FFFFFF",
+                          "backgroundOpacity": 100,
+                          "wordSpacing": 0
+                        },
+                        "type": "object",
+                        "properties": {
+                          "font_family": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 100
+                          },
+                          "font_size": {
+                            "type": "integer",
+                            "minimum": 32,
+                            "maximum": 240
+                          },
+                          "font_size_reference_height": {
+                            "type": "number",
+                            "const": 1920
+                          },
+                          "base_color": {
+                            "type": "string",
+                            "pattern": "^#[0-9A-Fa-f]{6}$"
+                          },
+                          "highlight_color": {
+                            "type": "string",
+                            "pattern": "^#[0-9A-Fa-f]{6}$"
+                          },
+                          "outline_color": {
+                            "type": "string",
+                            "pattern": "^#[0-9A-Fa-f]{6}$"
+                          },
+                          "outline_width": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 20
+                          },
+                          "background_color": {
+                            "type": "string",
+                            "pattern": "^#[0-9A-Fa-f]{6}$"
+                          },
+                          "background_opacity": {
+                            "type": "number",
+                            "const": 100
+                          },
+                          "word_spacing": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 30
+                          }
+                        },
+                        "required": [
+                          "font_family",
+                          "font_size",
+                          "base_color",
+                          "highlight_color",
+                          "outline_color",
+                          "outline_width",
+                          "background_color",
+                          "background_opacity",
+                          "word_spacing"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "required": [
+                      "asset_id",
+                      "file_name",
+                      "duration_seconds",
+                      "source_language_code",
+                      "target_language_code",
+                      "model_id",
+                      "public_owner_id",
+                      "voice_source",
+                      "stability",
+                      "similarity",
+                      "speed",
+                      "use_speaker_boost"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "project_id": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "maximum_outputs": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 50,
+                    "description": "Clipper output target. Other tools use their fixed output count."
+                  },
+                  "maximum_credits": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "description": "Reject if the server estimate exceeds this budget."
+                  }
+                }
+              },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["tool", "input"],
+                "properties": {
+                  "tool": {
+                    "const": "instagram_video_translator"
+                  },
+                  "input": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "type": "object",
+                    "properties": {
+                      "asset_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                      },
+                      "file_name": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 255
+                      },
+                      "duration_seconds": {
+                        "type": "number",
+                        "exclusiveMinimum": 0,
+                        "maximum": 90
+                      },
+                      "source_language_code": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "target_language_code": {
+                        "type": "string"
+                      },
+                      "voice_id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
+                      },
+                      "translate_audio": {
+                        "default": true,
+                        "type": "boolean"
+                      },
+                      "model_id": {
+                        "type": "string"
+                      },
+                      "public_owner_id": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 200
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "voice_source": {
+                        "type": "string",
+                        "enum": ["library", "custom"]
+                      },
+                      "stability": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 1
+                      },
+                      "similarity": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 1
+                      },
+                      "speed": {
+                        "type": "number",
+                        "minimum": 0.7,
+                        "maximum": 1.2
+                      },
+                      "use_speaker_boost": {
+                        "type": "boolean"
+                      },
+                      "translate_captions": {
+                        "default": true,
+                        "type": "boolean"
+                      },
+                      "caption_content_mode": {
+                        "default": "auto",
+                        "type": "string",
+                        "enum": ["auto", "speech_subtitles", "independent_text"]
+                      },
+                      "caption_region_override": {
+                        "description": "Optional source-detection and subtitle-placement area for speech_subtitles mode, used only when caption translation is enabled.",
+                        "anyOf": [
+                          {
+                            "type": "object",
+                            "properties": {
+                              "x": {
+                                "type": "number",
+                                "minimum": 0,
+                                "maximum": 100
+                              },
+                              "y": {
+                                "type": "number",
+                                "minimum": 0,
+                                "maximum": 100
+                              },
+                              "width": {
+                                "type": "number",
+                                "minimum": 2,
+                                "maximum": 100
+                              },
+                              "height": {
+                                "type": "number",
+                                "minimum": 2,
+                                "maximum": 100
+                              }
+                            },
+                            "required": ["x", "y", "width", "height"],
+                            "additionalProperties": false
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "caption_group_size": {
+                        "default": 6,
+                        "description": "Words per caption group when caption translation is enabled.",
+                        "type": "integer",
+                        "minimum": 3,
+                        "maximum": 8
+                      },
+                      "caption_style": {
+                        "default": {
+                          "fontFamily": "THE BOLD FONT",
+                          "fontSize": 120,
+                          "fontSizeReferenceHeight": 1920,
+                          "baseColor": "#111827",
+                          "highlightColor": "#111827",
+                          "outlineColor": "#111827",
+                          "outlineWidth": 0,
+                          "backgroundColor": "#FFFFFF",
+                          "backgroundOpacity": 100,
+                          "wordSpacing": 0
+                        },
+                        "type": "object",
+                        "properties": {
+                          "font_family": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 100
+                          },
+                          "font_size": {
+                            "type": "integer",
+                            "minimum": 32,
+                            "maximum": 240
+                          },
+                          "font_size_reference_height": {
+                            "type": "number",
+                            "const": 1920
+                          },
+                          "base_color": {
+                            "type": "string",
+                            "pattern": "^#[0-9A-Fa-f]{6}$"
+                          },
+                          "highlight_color": {
+                            "type": "string",
+                            "pattern": "^#[0-9A-Fa-f]{6}$"
+                          },
+                          "outline_color": {
+                            "type": "string",
+                            "pattern": "^#[0-9A-Fa-f]{6}$"
+                          },
+                          "outline_width": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 20
+                          },
+                          "background_color": {
+                            "type": "string",
+                            "pattern": "^#[0-9A-Fa-f]{6}$"
+                          },
+                          "background_opacity": {
+                            "type": "number",
+                            "const": 100
+                          },
+                          "word_spacing": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 30
+                          }
+                        },
+                        "required": [
+                          "font_family",
+                          "font_size",
+                          "base_color",
+                          "highlight_color",
+                          "outline_color",
+                          "outline_width",
+                          "background_color",
+                          "background_opacity",
+                          "word_spacing"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "required": [
+                      "asset_id",
+                      "file_name",
+                      "duration_seconds",
+                      "source_language_code",
+                      "target_language_code",
+                      "model_id",
+                      "public_owner_id",
+                      "voice_source",
+                      "stability",
+                      "similarity",
+                      "speed",
+                      "use_speaker_boost"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "project_id": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "maximum_outputs": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 50,
+                    "description": "Clipper output target. Other tools use their fixed output count."
+                  },
+                  "maximum_credits": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "description": "Reject if the server estimate exceeds this budget."
+                  }
+                }
+              },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["tool", "input"],
+                "properties": {
+                  "tool": {
+                    "const": "reels_translator"
+                  },
+                  "input": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "type": "object",
+                    "properties": {
+                      "asset_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                      },
+                      "file_name": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 255
+                      },
+                      "duration_seconds": {
+                        "type": "number",
+                        "exclusiveMinimum": 0,
+                        "maximum": 90
+                      },
+                      "source_language_code": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "target_language_code": {
+                        "type": "string"
+                      },
+                      "voice_id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
+                      },
+                      "translate_audio": {
+                        "default": true,
+                        "type": "boolean"
+                      },
+                      "model_id": {
+                        "type": "string"
+                      },
+                      "public_owner_id": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 200
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "voice_source": {
+                        "type": "string",
+                        "enum": ["library", "custom"]
+                      },
+                      "stability": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 1
+                      },
+                      "similarity": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 1
+                      },
+                      "speed": {
+                        "type": "number",
+                        "minimum": 0.7,
+                        "maximum": 1.2
+                      },
+                      "use_speaker_boost": {
+                        "type": "boolean"
+                      },
+                      "translate_captions": {
+                        "default": true,
+                        "type": "boolean"
+                      },
+                      "caption_content_mode": {
+                        "default": "auto",
+                        "type": "string",
+                        "enum": ["auto", "speech_subtitles", "independent_text"]
+                      },
+                      "caption_region_override": {
+                        "description": "Optional source-detection and subtitle-placement area for speech_subtitles mode, used only when caption translation is enabled.",
+                        "anyOf": [
+                          {
+                            "type": "object",
+                            "properties": {
+                              "x": {
+                                "type": "number",
+                                "minimum": 0,
+                                "maximum": 100
+                              },
+                              "y": {
+                                "type": "number",
+                                "minimum": 0,
+                                "maximum": 100
+                              },
+                              "width": {
+                                "type": "number",
+                                "minimum": 2,
+                                "maximum": 100
+                              },
+                              "height": {
+                                "type": "number",
+                                "minimum": 2,
+                                "maximum": 100
+                              }
+                            },
+                            "required": ["x", "y", "width", "height"],
+                            "additionalProperties": false
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "caption_group_size": {
+                        "default": 6,
+                        "description": "Words per caption group when caption translation is enabled.",
+                        "type": "integer",
+                        "minimum": 3,
+                        "maximum": 8
+                      },
+                      "caption_style": {
+                        "default": {
+                          "fontFamily": "THE BOLD FONT",
+                          "fontSize": 120,
+                          "fontSizeReferenceHeight": 1920,
+                          "baseColor": "#111827",
+                          "highlightColor": "#111827",
+                          "outlineColor": "#111827",
+                          "outlineWidth": 0,
+                          "backgroundColor": "#FFFFFF",
+                          "backgroundOpacity": 100,
+                          "wordSpacing": 0
+                        },
+                        "type": "object",
+                        "properties": {
+                          "font_family": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 100
+                          },
+                          "font_size": {
+                            "type": "integer",
+                            "minimum": 32,
+                            "maximum": 240
+                          },
+                          "font_size_reference_height": {
+                            "type": "number",
+                            "const": 1920
+                          },
+                          "base_color": {
+                            "type": "string",
+                            "pattern": "^#[0-9A-Fa-f]{6}$"
+                          },
+                          "highlight_color": {
+                            "type": "string",
+                            "pattern": "^#[0-9A-Fa-f]{6}$"
+                          },
+                          "outline_color": {
+                            "type": "string",
+                            "pattern": "^#[0-9A-Fa-f]{6}$"
+                          },
+                          "outline_width": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 20
+                          },
+                          "background_color": {
+                            "type": "string",
+                            "pattern": "^#[0-9A-Fa-f]{6}$"
+                          },
+                          "background_opacity": {
+                            "type": "number",
+                            "const": 100
+                          },
+                          "word_spacing": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 30
+                          }
+                        },
+                        "required": [
+                          "font_family",
+                          "font_size",
+                          "base_color",
+                          "highlight_color",
+                          "outline_color",
+                          "outline_width",
+                          "background_color",
+                          "background_opacity",
+                          "word_spacing"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "required": [
+                      "asset_id",
+                      "file_name",
+                      "duration_seconds",
+                      "source_language_code",
+                      "target_language_code",
                       "model_id",
                       "public_owner_id",
                       "voice_source",
@@ -8242,95 +10792,6 @@
                 "type": "object",
                 "additionalProperties": false,
                 "required": ["tool", "input", "maximum_credits"],
-                "properties": {
-                  "tool": {
-                    "const": "clip_discovery"
-                  },
-                  "input": {
-                    "$schema": "https://json-schema.org/draft/2020-12/schema",
-                    "type": "object",
-                    "properties": {
-                      "prompt": {
-                        "type": "string",
-                        "minLength": 5,
-                        "maxLength": 600
-                      },
-                      "duration": {
-                        "type": "number",
-                        "exclusiveMinimum": 0,
-                        "maximum": 7200
-                      },
-                      "max_clip_seconds": {
-                        "anyOf": [
-                          {
-                            "type": "number",
-                            "const": 30
-                          },
-                          {
-                            "type": "number",
-                            "const": 60
-                          },
-                          {
-                            "type": "number",
-                            "const": 90
-                          }
-                        ]
-                      },
-                      "cues": {
-                        "minItems": 1,
-                        "maxItems": 6000,
-                        "type": "array",
-                        "items": {
-                          "type": "object",
-                          "properties": {
-                            "start": {
-                              "type": "number",
-                              "minimum": 0
-                            },
-                            "end": {
-                              "type": "number",
-                              "exclusiveMinimum": 0
-                            },
-                            "text": {
-                              "type": "string",
-                              "minLength": 1,
-                              "maxLength": 2000
-                            }
-                          },
-                          "required": ["start", "end", "text"],
-                          "additionalProperties": false
-                        }
-                      }
-                    },
-                    "required": [
-                      "prompt",
-                      "duration",
-                      "max_clip_seconds",
-                      "cues"
-                    ],
-                    "additionalProperties": false
-                  },
-                  "project_id": {
-                    "type": "string",
-                    "format": "uuid"
-                  },
-                  "maximum_outputs": {
-                    "type": "integer",
-                    "minimum": 1,
-                    "maximum": 50,
-                    "description": "Clipper output target. Other tools use their fixed output count."
-                  },
-                  "maximum_credits": {
-                    "type": "integer",
-                    "minimum": 0,
-                    "description": "Reject if the server estimate exceeds this budget."
-                  }
-                }
-              },
-              {
-                "type": "object",
-                "additionalProperties": false,
-                "required": ["tool", "input", "maximum_credits"],
                 "not": {
                   "required": ["options"],
                   "properties": {
@@ -8522,6 +10983,58 @@
                       "options": {
                         "type": "object",
                         "properties": {
+                          "content_mode": {
+                            "type": "string",
+                            "enum": ["speech", "visual", "text"]
+                          },
+                          "caption_cues": {
+                            "minItems": 1,
+                            "maxItems": 60,
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "id": {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "maxLength": 80
+                                },
+                                "start_seconds": {
+                                  "type": "number",
+                                  "minimum": 0,
+                                  "maximum": 120
+                                },
+                                "end_seconds": {
+                                  "type": "number",
+                                  "exclusiveMinimum": 0,
+                                  "maximum": 120
+                                },
+                                "text": {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "maxLength": 500
+                                }
+                              },
+                              "required": [
+                                "id",
+                                "start_seconds",
+                                "end_seconds",
+                                "text"
+                              ],
+                              "additionalProperties": false
+                            }
+                          },
+                          "instructions": {
+                            "type": "string",
+                            "maxLength": 2000
+                          },
+                          "output_language": {
+                            "type": "string"
+                          },
+                          "tone": {
+                            "type": "string",
+                            "maxLength": 80
+                          },
                           "maximum_source_bytes": {
                             "type": "integer",
                             "exclusiveMinimum": 0,
@@ -8628,6 +11141,58 @@
                   "options": {
                     "type": "object",
                     "properties": {
+                      "content_mode": {
+                        "type": "string",
+                        "enum": ["speech", "visual", "text"]
+                      },
+                      "caption_cues": {
+                        "minItems": 1,
+                        "maxItems": 60,
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 80
+                            },
+                            "start_seconds": {
+                              "type": "number",
+                              "minimum": 0,
+                              "maximum": 120
+                            },
+                            "end_seconds": {
+                              "type": "number",
+                              "exclusiveMinimum": 0,
+                              "maximum": 120
+                            },
+                            "text": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 500
+                            }
+                          },
+                          "required": [
+                            "id",
+                            "start_seconds",
+                            "end_seconds",
+                            "text"
+                          ],
+                          "additionalProperties": false
+                        }
+                      },
+                      "instructions": {
+                        "type": "string",
+                        "maxLength": 2000
+                      },
+                      "output_language": {
+                        "type": "string"
+                      },
+                      "tone": {
+                        "type": "string",
+                        "maxLength": 80
+                      },
                       "maximum_source_bytes": {
                         "type": "integer",
                         "exclusiveMinimum": 0,
@@ -9332,6 +11897,11 @@
                         "minLength": 1,
                         "maxLength": 200
                       },
+                      "translate_audio": {
+                        "default": true,
+                        "description": "Default true: translate detected speech into the selected voice. Set false only with caption translation and independent_text to preserve the original audio.",
+                        "type": "boolean"
+                      },
                       "model_id": {
                         "type": "string"
                       },
@@ -9445,7 +12015,11 @@
                           "font_size": {
                             "type": "integer",
                             "minimum": 32,
-                            "maximum": 112
+                            "maximum": 240
+                          },
+                          "font_size_reference_height": {
+                            "type": "number",
+                            "const": 1920
                           },
                           "base_color": {
                             "type": "string",
@@ -9498,7 +12072,1228 @@
                       "duration_seconds",
                       "source_language_code",
                       "target_language_code",
-                      "voice_id",
+                      "model_id",
+                      "public_owner_id",
+                      "voice_source",
+                      "stability",
+                      "similarity",
+                      "speed",
+                      "use_speaker_boost"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "project_id": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "maximum_outputs": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 50,
+                    "description": "Clipper output target. Other tools use their fixed output count."
+                  },
+                  "maximum_credits": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "description": "Reject if the server estimate exceeds this budget."
+                  }
+                }
+              },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["tool", "input", "maximum_credits"],
+                "properties": {
+                  "tool": {
+                    "const": "video_ad_translator"
+                  },
+                  "input": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "type": "object",
+                    "properties": {
+                      "asset_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                      },
+                      "file_name": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 255
+                      },
+                      "duration_seconds": {
+                        "type": "number",
+                        "exclusiveMinimum": 0,
+                        "maximum": 90
+                      },
+                      "source_language_code": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "target_language_code": {
+                        "type": "string"
+                      },
+                      "voice_id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
+                      },
+                      "translate_audio": {
+                        "default": true,
+                        "type": "boolean"
+                      },
+                      "model_id": {
+                        "type": "string"
+                      },
+                      "public_owner_id": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 200
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "voice_source": {
+                        "type": "string",
+                        "enum": ["library", "custom"]
+                      },
+                      "stability": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 1
+                      },
+                      "similarity": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 1
+                      },
+                      "speed": {
+                        "type": "number",
+                        "minimum": 0.7,
+                        "maximum": 1.2
+                      },
+                      "use_speaker_boost": {
+                        "type": "boolean"
+                      },
+                      "translate_captions": {
+                        "default": true,
+                        "type": "boolean"
+                      },
+                      "caption_content_mode": {
+                        "default": "auto",
+                        "type": "string",
+                        "enum": ["auto", "speech_subtitles", "independent_text"]
+                      },
+                      "caption_region_override": {
+                        "description": "Optional source-detection and subtitle-placement area for speech_subtitles mode, used only when caption translation is enabled.",
+                        "anyOf": [
+                          {
+                            "type": "object",
+                            "properties": {
+                              "x": {
+                                "type": "number",
+                                "minimum": 0,
+                                "maximum": 100
+                              },
+                              "y": {
+                                "type": "number",
+                                "minimum": 0,
+                                "maximum": 100
+                              },
+                              "width": {
+                                "type": "number",
+                                "minimum": 2,
+                                "maximum": 100
+                              },
+                              "height": {
+                                "type": "number",
+                                "minimum": 2,
+                                "maximum": 100
+                              }
+                            },
+                            "required": ["x", "y", "width", "height"],
+                            "additionalProperties": false
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "caption_group_size": {
+                        "default": 6,
+                        "description": "Words per caption group when caption translation is enabled.",
+                        "type": "integer",
+                        "minimum": 3,
+                        "maximum": 8
+                      },
+                      "caption_style": {
+                        "default": {
+                          "fontFamily": "THE BOLD FONT",
+                          "fontSize": 120,
+                          "fontSizeReferenceHeight": 1920,
+                          "baseColor": "#111827",
+                          "highlightColor": "#111827",
+                          "outlineColor": "#111827",
+                          "outlineWidth": 0,
+                          "backgroundColor": "#FFFFFF",
+                          "backgroundOpacity": 100,
+                          "wordSpacing": 0
+                        },
+                        "type": "object",
+                        "properties": {
+                          "font_family": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 100
+                          },
+                          "font_size": {
+                            "type": "integer",
+                            "minimum": 32,
+                            "maximum": 240
+                          },
+                          "font_size_reference_height": {
+                            "type": "number",
+                            "const": 1920
+                          },
+                          "base_color": {
+                            "type": "string",
+                            "pattern": "^#[0-9A-Fa-f]{6}$"
+                          },
+                          "highlight_color": {
+                            "type": "string",
+                            "pattern": "^#[0-9A-Fa-f]{6}$"
+                          },
+                          "outline_color": {
+                            "type": "string",
+                            "pattern": "^#[0-9A-Fa-f]{6}$"
+                          },
+                          "outline_width": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 20
+                          },
+                          "background_color": {
+                            "type": "string",
+                            "pattern": "^#[0-9A-Fa-f]{6}$"
+                          },
+                          "background_opacity": {
+                            "type": "number",
+                            "const": 100
+                          },
+                          "word_spacing": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 30
+                          }
+                        },
+                        "required": [
+                          "font_family",
+                          "font_size",
+                          "base_color",
+                          "highlight_color",
+                          "outline_color",
+                          "outline_width",
+                          "background_color",
+                          "background_opacity",
+                          "word_spacing"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "required": [
+                      "asset_id",
+                      "file_name",
+                      "duration_seconds",
+                      "source_language_code",
+                      "target_language_code",
+                      "model_id",
+                      "public_owner_id",
+                      "voice_source",
+                      "stability",
+                      "similarity",
+                      "speed",
+                      "use_speaker_boost"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "project_id": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "maximum_outputs": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 50,
+                    "description": "Clipper output target. Other tools use their fixed output count."
+                  },
+                  "maximum_credits": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "description": "Reject if the server estimate exceeds this budget."
+                  }
+                }
+              },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["tool", "input", "maximum_credits"],
+                "properties": {
+                  "tool": {
+                    "const": "video_text_translator"
+                  },
+                  "input": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "type": "object",
+                    "properties": {
+                      "asset_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                      },
+                      "file_name": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 255
+                      },
+                      "duration_seconds": {
+                        "type": "number",
+                        "exclusiveMinimum": 0,
+                        "maximum": 90
+                      },
+                      "source_language_code": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "target_language_code": {
+                        "type": "string"
+                      },
+                      "voice_id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
+                      },
+                      "translate_audio": {
+                        "default": false,
+                        "type": "boolean",
+                        "const": false
+                      },
+                      "model_id": {
+                        "type": "string"
+                      },
+                      "public_owner_id": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 200
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "voice_source": {
+                        "type": "string",
+                        "enum": ["library", "custom"]
+                      },
+                      "stability": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 1
+                      },
+                      "similarity": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 1
+                      },
+                      "speed": {
+                        "type": "number",
+                        "minimum": 0.7,
+                        "maximum": 1.2
+                      },
+                      "use_speaker_boost": {
+                        "type": "boolean"
+                      },
+                      "translate_captions": {
+                        "default": true,
+                        "type": "boolean",
+                        "const": true
+                      },
+                      "caption_content_mode": {
+                        "default": "independent_text",
+                        "type": "string",
+                        "const": "independent_text"
+                      },
+                      "caption_region_override": {
+                        "description": "Optional source-detection and subtitle-placement area for speech_subtitles mode, used only when caption translation is enabled.",
+                        "anyOf": [
+                          {
+                            "type": "object",
+                            "properties": {
+                              "x": {
+                                "type": "number",
+                                "minimum": 0,
+                                "maximum": 100
+                              },
+                              "y": {
+                                "type": "number",
+                                "minimum": 0,
+                                "maximum": 100
+                              },
+                              "width": {
+                                "type": "number",
+                                "minimum": 2,
+                                "maximum": 100
+                              },
+                              "height": {
+                                "type": "number",
+                                "minimum": 2,
+                                "maximum": 100
+                              }
+                            },
+                            "required": ["x", "y", "width", "height"],
+                            "additionalProperties": false
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "caption_group_size": {
+                        "default": 6,
+                        "description": "Words per caption group when caption translation is enabled.",
+                        "type": "integer",
+                        "minimum": 3,
+                        "maximum": 8
+                      },
+                      "caption_style": {
+                        "default": {
+                          "fontFamily": "THE BOLD FONT",
+                          "fontSize": 120,
+                          "fontSizeReferenceHeight": 1920,
+                          "baseColor": "#111827",
+                          "highlightColor": "#111827",
+                          "outlineColor": "#111827",
+                          "outlineWidth": 0,
+                          "backgroundColor": "#FFFFFF",
+                          "backgroundOpacity": 100,
+                          "wordSpacing": 0
+                        },
+                        "type": "object",
+                        "properties": {
+                          "font_family": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 100
+                          },
+                          "font_size": {
+                            "type": "integer",
+                            "minimum": 32,
+                            "maximum": 240
+                          },
+                          "font_size_reference_height": {
+                            "type": "number",
+                            "const": 1920
+                          },
+                          "base_color": {
+                            "type": "string",
+                            "pattern": "^#[0-9A-Fa-f]{6}$"
+                          },
+                          "highlight_color": {
+                            "type": "string",
+                            "pattern": "^#[0-9A-Fa-f]{6}$"
+                          },
+                          "outline_color": {
+                            "type": "string",
+                            "pattern": "^#[0-9A-Fa-f]{6}$"
+                          },
+                          "outline_width": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 20
+                          },
+                          "background_color": {
+                            "type": "string",
+                            "pattern": "^#[0-9A-Fa-f]{6}$"
+                          },
+                          "background_opacity": {
+                            "type": "number",
+                            "const": 100
+                          },
+                          "word_spacing": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 30
+                          }
+                        },
+                        "required": [
+                          "font_family",
+                          "font_size",
+                          "base_color",
+                          "highlight_color",
+                          "outline_color",
+                          "outline_width",
+                          "background_color",
+                          "background_opacity",
+                          "word_spacing"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "required": [
+                      "asset_id",
+                      "file_name",
+                      "duration_seconds",
+                      "source_language_code",
+                      "target_language_code",
+                      "model_id",
+                      "public_owner_id",
+                      "voice_source",
+                      "stability",
+                      "similarity",
+                      "speed",
+                      "use_speaker_boost"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "project_id": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "maximum_outputs": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 50,
+                    "description": "Clipper output target. Other tools use their fixed output count."
+                  },
+                  "maximum_credits": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "description": "Reject if the server estimate exceeds this budget."
+                  }
+                }
+              },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["tool", "input", "maximum_credits"],
+                "properties": {
+                  "tool": {
+                    "const": "tiktok_video_translator"
+                  },
+                  "input": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "type": "object",
+                    "properties": {
+                      "asset_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                      },
+                      "file_name": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 255
+                      },
+                      "duration_seconds": {
+                        "type": "number",
+                        "exclusiveMinimum": 0,
+                        "maximum": 90
+                      },
+                      "source_language_code": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "target_language_code": {
+                        "type": "string"
+                      },
+                      "voice_id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
+                      },
+                      "translate_audio": {
+                        "default": true,
+                        "type": "boolean"
+                      },
+                      "model_id": {
+                        "type": "string"
+                      },
+                      "public_owner_id": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 200
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "voice_source": {
+                        "type": "string",
+                        "enum": ["library", "custom"]
+                      },
+                      "stability": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 1
+                      },
+                      "similarity": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 1
+                      },
+                      "speed": {
+                        "type": "number",
+                        "minimum": 0.7,
+                        "maximum": 1.2
+                      },
+                      "use_speaker_boost": {
+                        "type": "boolean"
+                      },
+                      "translate_captions": {
+                        "default": true,
+                        "type": "boolean"
+                      },
+                      "caption_content_mode": {
+                        "default": "auto",
+                        "type": "string",
+                        "enum": ["auto", "speech_subtitles", "independent_text"]
+                      },
+                      "caption_region_override": {
+                        "description": "Optional source-detection and subtitle-placement area for speech_subtitles mode, used only when caption translation is enabled.",
+                        "anyOf": [
+                          {
+                            "type": "object",
+                            "properties": {
+                              "x": {
+                                "type": "number",
+                                "minimum": 0,
+                                "maximum": 100
+                              },
+                              "y": {
+                                "type": "number",
+                                "minimum": 0,
+                                "maximum": 100
+                              },
+                              "width": {
+                                "type": "number",
+                                "minimum": 2,
+                                "maximum": 100
+                              },
+                              "height": {
+                                "type": "number",
+                                "minimum": 2,
+                                "maximum": 100
+                              }
+                            },
+                            "required": ["x", "y", "width", "height"],
+                            "additionalProperties": false
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "caption_group_size": {
+                        "default": 6,
+                        "description": "Words per caption group when caption translation is enabled.",
+                        "type": "integer",
+                        "minimum": 3,
+                        "maximum": 8
+                      },
+                      "caption_style": {
+                        "default": {
+                          "fontFamily": "THE BOLD FONT",
+                          "fontSize": 120,
+                          "fontSizeReferenceHeight": 1920,
+                          "baseColor": "#111827",
+                          "highlightColor": "#111827",
+                          "outlineColor": "#111827",
+                          "outlineWidth": 0,
+                          "backgroundColor": "#FFFFFF",
+                          "backgroundOpacity": 100,
+                          "wordSpacing": 0
+                        },
+                        "type": "object",
+                        "properties": {
+                          "font_family": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 100
+                          },
+                          "font_size": {
+                            "type": "integer",
+                            "minimum": 32,
+                            "maximum": 240
+                          },
+                          "font_size_reference_height": {
+                            "type": "number",
+                            "const": 1920
+                          },
+                          "base_color": {
+                            "type": "string",
+                            "pattern": "^#[0-9A-Fa-f]{6}$"
+                          },
+                          "highlight_color": {
+                            "type": "string",
+                            "pattern": "^#[0-9A-Fa-f]{6}$"
+                          },
+                          "outline_color": {
+                            "type": "string",
+                            "pattern": "^#[0-9A-Fa-f]{6}$"
+                          },
+                          "outline_width": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 20
+                          },
+                          "background_color": {
+                            "type": "string",
+                            "pattern": "^#[0-9A-Fa-f]{6}$"
+                          },
+                          "background_opacity": {
+                            "type": "number",
+                            "const": 100
+                          },
+                          "word_spacing": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 30
+                          }
+                        },
+                        "required": [
+                          "font_family",
+                          "font_size",
+                          "base_color",
+                          "highlight_color",
+                          "outline_color",
+                          "outline_width",
+                          "background_color",
+                          "background_opacity",
+                          "word_spacing"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "required": [
+                      "asset_id",
+                      "file_name",
+                      "duration_seconds",
+                      "source_language_code",
+                      "target_language_code",
+                      "model_id",
+                      "public_owner_id",
+                      "voice_source",
+                      "stability",
+                      "similarity",
+                      "speed",
+                      "use_speaker_boost"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "project_id": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "maximum_outputs": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 50,
+                    "description": "Clipper output target. Other tools use their fixed output count."
+                  },
+                  "maximum_credits": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "description": "Reject if the server estimate exceeds this budget."
+                  }
+                }
+              },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["tool", "input", "maximum_credits"],
+                "properties": {
+                  "tool": {
+                    "const": "instagram_video_translator"
+                  },
+                  "input": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "type": "object",
+                    "properties": {
+                      "asset_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                      },
+                      "file_name": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 255
+                      },
+                      "duration_seconds": {
+                        "type": "number",
+                        "exclusiveMinimum": 0,
+                        "maximum": 90
+                      },
+                      "source_language_code": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "target_language_code": {
+                        "type": "string"
+                      },
+                      "voice_id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
+                      },
+                      "translate_audio": {
+                        "default": true,
+                        "type": "boolean"
+                      },
+                      "model_id": {
+                        "type": "string"
+                      },
+                      "public_owner_id": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 200
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "voice_source": {
+                        "type": "string",
+                        "enum": ["library", "custom"]
+                      },
+                      "stability": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 1
+                      },
+                      "similarity": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 1
+                      },
+                      "speed": {
+                        "type": "number",
+                        "minimum": 0.7,
+                        "maximum": 1.2
+                      },
+                      "use_speaker_boost": {
+                        "type": "boolean"
+                      },
+                      "translate_captions": {
+                        "default": true,
+                        "type": "boolean"
+                      },
+                      "caption_content_mode": {
+                        "default": "auto",
+                        "type": "string",
+                        "enum": ["auto", "speech_subtitles", "independent_text"]
+                      },
+                      "caption_region_override": {
+                        "description": "Optional source-detection and subtitle-placement area for speech_subtitles mode, used only when caption translation is enabled.",
+                        "anyOf": [
+                          {
+                            "type": "object",
+                            "properties": {
+                              "x": {
+                                "type": "number",
+                                "minimum": 0,
+                                "maximum": 100
+                              },
+                              "y": {
+                                "type": "number",
+                                "minimum": 0,
+                                "maximum": 100
+                              },
+                              "width": {
+                                "type": "number",
+                                "minimum": 2,
+                                "maximum": 100
+                              },
+                              "height": {
+                                "type": "number",
+                                "minimum": 2,
+                                "maximum": 100
+                              }
+                            },
+                            "required": ["x", "y", "width", "height"],
+                            "additionalProperties": false
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "caption_group_size": {
+                        "default": 6,
+                        "description": "Words per caption group when caption translation is enabled.",
+                        "type": "integer",
+                        "minimum": 3,
+                        "maximum": 8
+                      },
+                      "caption_style": {
+                        "default": {
+                          "fontFamily": "THE BOLD FONT",
+                          "fontSize": 120,
+                          "fontSizeReferenceHeight": 1920,
+                          "baseColor": "#111827",
+                          "highlightColor": "#111827",
+                          "outlineColor": "#111827",
+                          "outlineWidth": 0,
+                          "backgroundColor": "#FFFFFF",
+                          "backgroundOpacity": 100,
+                          "wordSpacing": 0
+                        },
+                        "type": "object",
+                        "properties": {
+                          "font_family": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 100
+                          },
+                          "font_size": {
+                            "type": "integer",
+                            "minimum": 32,
+                            "maximum": 240
+                          },
+                          "font_size_reference_height": {
+                            "type": "number",
+                            "const": 1920
+                          },
+                          "base_color": {
+                            "type": "string",
+                            "pattern": "^#[0-9A-Fa-f]{6}$"
+                          },
+                          "highlight_color": {
+                            "type": "string",
+                            "pattern": "^#[0-9A-Fa-f]{6}$"
+                          },
+                          "outline_color": {
+                            "type": "string",
+                            "pattern": "^#[0-9A-Fa-f]{6}$"
+                          },
+                          "outline_width": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 20
+                          },
+                          "background_color": {
+                            "type": "string",
+                            "pattern": "^#[0-9A-Fa-f]{6}$"
+                          },
+                          "background_opacity": {
+                            "type": "number",
+                            "const": 100
+                          },
+                          "word_spacing": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 30
+                          }
+                        },
+                        "required": [
+                          "font_family",
+                          "font_size",
+                          "base_color",
+                          "highlight_color",
+                          "outline_color",
+                          "outline_width",
+                          "background_color",
+                          "background_opacity",
+                          "word_spacing"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "required": [
+                      "asset_id",
+                      "file_name",
+                      "duration_seconds",
+                      "source_language_code",
+                      "target_language_code",
+                      "model_id",
+                      "public_owner_id",
+                      "voice_source",
+                      "stability",
+                      "similarity",
+                      "speed",
+                      "use_speaker_boost"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "project_id": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "maximum_outputs": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 50,
+                    "description": "Clipper output target. Other tools use their fixed output count."
+                  },
+                  "maximum_credits": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "description": "Reject if the server estimate exceeds this budget."
+                  }
+                }
+              },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["tool", "input", "maximum_credits"],
+                "properties": {
+                  "tool": {
+                    "const": "reels_translator"
+                  },
+                  "input": {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "type": "object",
+                    "properties": {
+                      "asset_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                      },
+                      "file_name": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 255
+                      },
+                      "duration_seconds": {
+                        "type": "number",
+                        "exclusiveMinimum": 0,
+                        "maximum": 90
+                      },
+                      "source_language_code": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "target_language_code": {
+                        "type": "string"
+                      },
+                      "voice_id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
+                      },
+                      "translate_audio": {
+                        "default": true,
+                        "type": "boolean"
+                      },
+                      "model_id": {
+                        "type": "string"
+                      },
+                      "public_owner_id": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 200
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "voice_source": {
+                        "type": "string",
+                        "enum": ["library", "custom"]
+                      },
+                      "stability": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 1
+                      },
+                      "similarity": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 1
+                      },
+                      "speed": {
+                        "type": "number",
+                        "minimum": 0.7,
+                        "maximum": 1.2
+                      },
+                      "use_speaker_boost": {
+                        "type": "boolean"
+                      },
+                      "translate_captions": {
+                        "default": true,
+                        "type": "boolean"
+                      },
+                      "caption_content_mode": {
+                        "default": "auto",
+                        "type": "string",
+                        "enum": ["auto", "speech_subtitles", "independent_text"]
+                      },
+                      "caption_region_override": {
+                        "description": "Optional source-detection and subtitle-placement area for speech_subtitles mode, used only when caption translation is enabled.",
+                        "anyOf": [
+                          {
+                            "type": "object",
+                            "properties": {
+                              "x": {
+                                "type": "number",
+                                "minimum": 0,
+                                "maximum": 100
+                              },
+                              "y": {
+                                "type": "number",
+                                "minimum": 0,
+                                "maximum": 100
+                              },
+                              "width": {
+                                "type": "number",
+                                "minimum": 2,
+                                "maximum": 100
+                              },
+                              "height": {
+                                "type": "number",
+                                "minimum": 2,
+                                "maximum": 100
+                              }
+                            },
+                            "required": ["x", "y", "width", "height"],
+                            "additionalProperties": false
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "caption_group_size": {
+                        "default": 6,
+                        "description": "Words per caption group when caption translation is enabled.",
+                        "type": "integer",
+                        "minimum": 3,
+                        "maximum": 8
+                      },
+                      "caption_style": {
+                        "default": {
+                          "fontFamily": "THE BOLD FONT",
+                          "fontSize": 120,
+                          "fontSizeReferenceHeight": 1920,
+                          "baseColor": "#111827",
+                          "highlightColor": "#111827",
+                          "outlineColor": "#111827",
+                          "outlineWidth": 0,
+                          "backgroundColor": "#FFFFFF",
+                          "backgroundOpacity": 100,
+                          "wordSpacing": 0
+                        },
+                        "type": "object",
+                        "properties": {
+                          "font_family": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 100
+                          },
+                          "font_size": {
+                            "type": "integer",
+                            "minimum": 32,
+                            "maximum": 240
+                          },
+                          "font_size_reference_height": {
+                            "type": "number",
+                            "const": 1920
+                          },
+                          "base_color": {
+                            "type": "string",
+                            "pattern": "^#[0-9A-Fa-f]{6}$"
+                          },
+                          "highlight_color": {
+                            "type": "string",
+                            "pattern": "^#[0-9A-Fa-f]{6}$"
+                          },
+                          "outline_color": {
+                            "type": "string",
+                            "pattern": "^#[0-9A-Fa-f]{6}$"
+                          },
+                          "outline_width": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 20
+                          },
+                          "background_color": {
+                            "type": "string",
+                            "pattern": "^#[0-9A-Fa-f]{6}$"
+                          },
+                          "background_opacity": {
+                            "type": "number",
+                            "const": 100
+                          },
+                          "word_spacing": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 30
+                          }
+                        },
+                        "required": [
+                          "font_family",
+                          "font_size",
+                          "base_color",
+                          "highlight_color",
+                          "outline_color",
+                          "outline_width",
+                          "background_color",
+                          "background_opacity",
+                          "word_spacing"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "required": [
+                      "asset_id",
+                      "file_name",
+                      "duration_seconds",
+                      "source_language_code",
+                      "target_language_code",
                       "model_id",
                       "public_owner_id",
                       "voice_source",

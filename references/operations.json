@@ -2,8 +2,8 @@
   "source": {
     "repository": "https://github.com/asterism-software/reclip-io",
     "branch": "main",
-    "commit": "16a98f15ec8f4bd5d5a675f77e31d655dcd79d1d",
-    "merged_main": "16a98f15ec8f4bd5d5a675f77e31d655dcd79d1d",
+    "commit": "b9dccd6bbd2af1baa50e711ab717c3d79fafc420",
+    "merged_main": "b9dccd6bbd2af1baa50e711ab717c3d79fafc420",
     "working_tree": true,
     "api_version": "1.0.0-beta.2",
     "tool_codes": [
@@ -15,7 +15,6 @@
       "ai_image_generator",
       "image_background_remover",
       "ai_clipper",
-      "clip_discovery",
       "ai_broll",
       "ai_captions",
       "video_to_prompt",
@@ -27,6 +26,11 @@
       "gemini_watermark_bulk_remover",
       "ai_voiceover",
       "translate_and_dub",
+      "video_ad_translator",
+      "video_text_translator",
+      "tiktok_video_translator",
+      "instagram_video_translator",
+      "reels_translator",
       "roblox_rant",
       "video_downloader",
       "youtube_transcript",
@@ -38,7 +42,7 @@
       "video_to_gif",
       "transcription"
     ],
-    "contract_sha256": "a112c8d9c0e153f86d52f7b3dfb6f5f7f47eaff34cff7121b41c56340c5d3d78"
+    "contract_sha256": "2850d9ddb7d57e10f8f330363d80c990a14084aab83ca8b6616f1ef1488f43df"
   },
   "operations": [
     {
